@@ -1,6 +1,8 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { useIntlayer } from 'react-intlayer';
 
+import { Slider } from '../components/Slider';
+
 import { useUi, onFrame, ui } from '../core/store';
 import { STATE } from '../core/state';
 import { clamp, fmt, secColor, secLabel } from '../core/util';
@@ -50,12 +52,12 @@ function SeekBar() {
   return <div id="seek">
     <div className="t" id="tcur" ref={curT}>0:00</div>
     <div id="tl" ref={tl}
-      onPointerDown={(e) => { 
-        if (inputLocked()) 
-          return; 
-        drag.current = true; 
-        e.currentTarget.setPointerCapture(e.pointerId); 
-        seekTo(e.clientX); 
+      onPointerDown={(e) => {
+        if (inputLocked())
+          return;
+        drag.current = true;
+        e.currentTarget.setPointerCapture(e.pointerId);
+        seekTo(e.clientX);
       }}
       onPointerMove={(e) => {
         const r = tl.current!.getBoundingClientRect(), h = hint.current!;
@@ -66,7 +68,7 @@ function SeekBar() {
         const tone = STATE.tones.changes.length ? toneLabel(toneKeyAt(tt - STATE.offMs / 1000)) : '';
         (h.firstElementChild as HTMLElement).textContent = fmt(tt);
         (h.lastElementChild as HTMLElement).textContent = [sec ? secLabel(sec.name) : '', tone].filter(Boolean).join(' · ');
-        if (drag.current) 
+        if (drag.current)
           seekTo(e.clientX);
       }}
       onPointerUp={() => { drag.current = false; }}
@@ -76,15 +78,15 @@ function SeekBar() {
           <div key={i} className={'s' + (i === secIdx ? ' cur' : '')} title={secLabel(s.name)}
             style={{ left: 100 * t0 / D + '%', width: 100 * (t1 - t0) / D + '%', background: secColor(s.name) }}>
             <span>{secLabel(s.name)}</span></div>)
-          : <div className="s gap" style={{ left: '0%', width: '100%' }}><span style={{ color: '#4a5560' }}>{noSection}</span></div>}
+          : <div className="s gap" style={{ left: '0%', width: '100%' }}><span style={{ color: 'var(--on-surface)' }}>{noSection}</span></div>}
       </div>
       <div id="tlplayed" ref={played} />
-      <div id="tltone">{tones.map((c, i) => { 
-        const x = (c.t + off) / D; 
-        return x < 0 || x > 1 
-          ? null 
-          : <div className="tn" key={i} style={{ left: 100 * x + '%' }} />; 
-        }
+      <div id="tltone">{tones.map((c, i) => {
+        const x = (c.t + off) / D;
+        return x < 0 || x > 1
+          ? null
+          : <div className="tn" key={i} style={{ left: 100 * x + '%' }} />;
+      }
       )}</div>
       <div id="tlhead" ref={head} />
     </div>
@@ -95,9 +97,9 @@ function SeekBar() {
 }
 
 export default function Bar() {
-  const { 
+  const {
     tuningHint, restartHint, prevSectionHint, pauseHint, playHint, nextSectionHint, loopSectionHint, tabViewHint, tabTitle,
-    muteHint, songSpeedHint, metronomeHint, noteSynthHint, openSongHint, openTitle, optionsHint, optionsTitle
+    muteHint, songSpeedHint, metronomeHint, noteSynthHint, openSongHint, openTitle, optionsHint
   } = useIntlayer("bar");
 
   const s = useUi((x) => x);
@@ -132,37 +134,37 @@ export default function Bar() {
         <button className={'ib' + (s.playing ? ' on' : '')} id="bPlay" title={s.playing ? pauseHint : playHint} onClick={togglePlay}>{s.playing ? <IconPause /> : <IconPlay />}</button>
         <button className="ib" id="bNext" title={nextSectionHint} onClick={() => {
           const x = sectionAt(STATE.time + 0.05);
-          if (x && x.idx + 1 < STATE.sections.length) 
-            seek(STATE.sections[x.idx + 1].time); 
-          else 
+          if (x && x.idx + 1 < STATE.sections.length)
+            seek(STATE.sections[x.idx + 1].time);
+          else
             seek(STATE.duration - 0.05);
         }}><IconNext /></button>
         <button className={'ib' + (s.loop ? ' on' : '')} id="bLoop" title={loopSectionHint} onClick={toggleSectionLoop}><IconLoop /></button>
         <button className={'ib' + (s.tabView ? ' on' : '')} id="bTab" title={tabViewHint} onClick={() => setPref('tabView', !STATE.tabView)}><IconTab /><span>{tabTitle}</span></button>
       </div>
-      
+
       <div id="tools">
         <div className="stack">
           <div className="vol">
             <button className={'ib' + (s.muted ? ' on' : '')} id="bMute" title={muteHint} onClick={() => setPref('muted', !STATE.muted)}><IconMute on={s.muted} /></button>
-            <input id="vMaster" type="range" min={0} max={100} value={s.master} onChange={(e) => setPref('master', +e.target.value / 100)} />
+            <Slider min={0} max={100} value={s.master} onChange={(e) => setPref('master', +e.target.value / 100)} />
             <span className="val" id="lMaster">{s.master}</span>
           </div>
           <div className="vol" id="spd">
             <button className="ib" id="bSpeed" title={songSpeedHint} onClick={() => { void setSongSpeed(1); }}><IconSpeed /></button>
-            <input id="vSpeed" type="range" min={20} max={100} value={s.songRate} onChange={(e) => { void setSongSpeed(+e.target.value / 100); }} />
+            <Slider min={20} max={100} value={s.songRate} onChange={(e) => { void setSongSpeed(+e.target.value / 100); }} />
             <span className="val" id="lSpeed">{s.songRate}%</span>
           </div>
         </div>
         <div className="stack">
           <div className="vol">
             <button className={'ib' + (s.clickOn ? ' on' : '')} id="bClick" title={metronomeHint} onClick={() => setPref('clickOn', !STATE.clickOn)}><IconClick /></button>
-            <input id="vClick" type="range" min={0} max={100} value={s.clickLevel} onChange={(e) => setPref('clickLevel', +e.target.value / 100)} />
+            <Slider min={0} max={100} value={s.clickLevel} onChange={(e) => setPref('clickLevel', +e.target.value / 100)} />
             <span className="val" id="lClick">{s.clickLevel}</span>
           </div>
           <div className="vol">
             <button className={'ib' + (s.synthOn ? ' on' : '')} id="bSynth" title={noteSynthHint} onClick={() => setPref('synthOn', !STATE.synthOn)}><IconSynth /></button>
-            <input id="vSynth" type="range" min={0} max={100} value={s.synthLevel} onChange={(e) => setPref('synthLevel', +e.target.value / 100)} />
+            <Slider min={0} max={100} value={s.synthLevel} onChange={(e) => setPref('synthLevel', +e.target.value / 100)} />
             <span className="val" id="lSynth">{s.synthLevel}</span>
           </div>
         </div>
@@ -171,7 +173,7 @@ export default function Bar() {
           <div id="fps">{s.fps} FPS{s.autoScale && s.dynScale < 0.999 ? ' · ' + Math.round(s.dynScale * 100) + '%' : ''}</div>
         </div>
         <button className="ib" id="bOpen" title={openSongHint} onClick={pickFiles}><IconOpen /><span>{openTitle}</span></button>
-        <button className={'ib' + (s.cfgOpen ? ' on' : '')} id="bCfg" title={optionsHint} onClick={() => ui.set({ cfgOpen: !s.cfgOpen })}><IconGear /><span>{optionsTitle}</span></button>
+        <button className={'ib' + (s.cfgOpen ? ' on' : '')} id="bCfg" title={optionsHint} onClick={() => ui.set({ cfgOpen: !s.cfgOpen })}><IconGear /></button>
       </div>
     </div>
   </div>;

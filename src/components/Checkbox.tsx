@@ -1,14 +1,14 @@
-import React, { useEffect } from 'react';
+import React from 'react';
+
+import { IconCheckmark } from '../ui/Icons';
 
 import '@/css/Checkbox.css';
 
-export interface CheckboxProps extends React.HTMLAttributes<HTMLDivElement> {
-    checked?: boolean,
-    label?: string,
-    onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
+export interface CheckboxProps extends React.InputHTMLAttributes<HTMLInputElement> {
+    label?: string
 }
 
-export const Checkbox: React.FC<CheckboxProps> = ({ checked, label, onChange, ...props }) => {
+export const Checkbox: React.FC<CheckboxProps> = ({ label, checked, onChange, ...props }) => {
     let checkbox = React.createRef<HTMLInputElement>();
 
     return (
@@ -19,7 +19,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({ checked, label, onChange, ..
                 : null
             }            
             <span className="checkmark">
-                <svg viewBox="0 0 26 26"><path className='path' fill="none" stroke="currentColor" d="M1.73,12.91 8.1,19.28 22.79,4.59"></path></svg>
+                <IconCheckmark />
             </span>
         </label>
     )

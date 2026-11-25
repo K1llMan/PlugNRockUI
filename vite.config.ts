@@ -1,5 +1,6 @@
 import react from '@vitejs/plugin-react';
 import { intlayer } from "vite-intlayer";
+import svgr from 'vite-plugin-svgr';
 
 import { defineConfig } from 'vite';
 
@@ -16,7 +17,8 @@ export default defineConfig({
   },
   plugins: [
     intlayer(),
-    react()
+    react(),
+    svgr()
   ],
   base: './',
   server: { port: 5173, proxy: { '/api': { target, changeOrigin: true }, '/audio': { target, changeOrigin: true } } },

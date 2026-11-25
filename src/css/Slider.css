@@ -1,0 +1,47 @@
+input[type=range].Slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 84px;
+    height: 4px;
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+    
+    --track-color: var(--inverse-surface);
+    --fill-color: var(--inverse-primary);
+
+    background: linear-gradient(
+        to right,
+        var(--fill-color) 0%,
+        var(--fill-color) var(--progress),
+        var(--track-color) var(--progress),
+        var(--track-color) 100%
+    );
+}
+
+input[type=range].Slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: var(--secondary-container);
+    border: 0;
+    cursor: pointer
+}
+
+input[type=range].Slider::-webkit-slider-thumb:hover {
+    background: var(--primary);
+}
+
+input[type=range].Slider::-moz-range-thumb {
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: var(--secondary-container);
+    border: 0;
+    cursor: pointer
+}
+
+input[type=range].Slider::-moz-range-thumb:hover {
+    background: var(--primary);
+} 

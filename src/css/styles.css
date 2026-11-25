@@ -33,10 +33,6 @@
     --inverse-surface: #E2E2E9;
     --inverse-on-surface: #2E3036;
     --inverse-primary: #005AC1;
-
-    --accent: #3fb950;
-    --playhead: #e05a5a;
-    --bar: #0a0b0d;
 }
 
 * {
@@ -878,8 +874,8 @@ body.locked {
     min-width: 36px
 }
 
-#spd input[type=range] {
-    background: #b0782a
+#spd .Slider {
+    --fill-color: #b0782a
 }
 
 #album:not(:empty)::before {
@@ -909,12 +905,14 @@ body.locked {
     color: var(--on-surface);
 }
 
-.ib:hover {
+.ib:hover,
+.ib.on:hover {
     background-color: var(--surface-container-high);
     border-color: var(--outline-variant);
 }
 
-.ib:active {
+.ib:active
+.ib.on:active {
     background-color: var(--primary);
     color: var(--on-primary);
 }
@@ -1045,36 +1043,6 @@ body.locked {
     gap: 6px
 }
 
-.vol input[type=range] {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 84px;
-    height: 4px;
-    border-radius: 2px;
-    background: #2a64c8;
-    outline: none;
-    cursor: pointer
-}
-
-.vol input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 13px;
-    height: 13px;
-    border-radius: 50%;
-    background: #e9eef4;
-    border: 0;
-    cursor: pointer
-}
-
-.vol input[type=range]::-moz-range-thumb {
-    width: 13px;
-    height: 13px;
-    border-radius: 50%;
-    background: #e9eef4;
-    border: 0;
-    cursor: pointer
-}
-
 .vol .val {
     font: 600 12px/1 "Cascadia Mono", Consolas, monospace;
     min-width: 30px;
@@ -1093,15 +1061,17 @@ body.locked {
 }
 
 #fps {
-    color: var(--accent)
+    color: #3fb950;
 }
 
 #bCfg {
     width: auto;
-    padding: 0 11px;
-    gap: 7px;
     font: 600 12.5px "Segoe UI", system-ui, sans-serif;
-    border-color: var(--outline);
+}
+
+#bCfg svg {
+    width: 36px;
+    height: 36px;
 }
 
 #cfg {
@@ -1310,12 +1280,6 @@ body.locked {
     }
 
     #album {
-        display: none
-    }
-
-    #vMaster,
-    #vClick,
-    #vSynth {
         display: none
     }
 

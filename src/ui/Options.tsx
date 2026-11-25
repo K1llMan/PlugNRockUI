@@ -1,6 +1,8 @@
 import { useIntlayer } from 'react-intlayer';
 
 import { Checkbox } from '../components/Checkbox';
+import { Slider } from '../components/Slider';
+
 import { useUi } from '../core/store';
 import { STATE } from '../core/state';
 import { setPref, type PrefKey } from '../core/prefs';
@@ -37,11 +39,13 @@ export default function Options() {
 
   return <div id="cfg" className={open ? 'show' : ''}>
     <h4>{highwayHeader}</h4>
-    <div className="row"><label htmlFor="fSpeed">{noteSpeedTitle}<span className="rv" id="rvSpeed">{speed}%</span></label>
-      <input id="fSpeed" type="range" min={60} max={200} value={speed} onChange={(e) => setPref('speed', +e.target.value / 100)} />
+    <div className="row">
+      <label htmlFor="fSpeed">{noteSpeedTitle}<span className="rv" id="rvSpeed">{speed}%</span></label>
+      <Slider id="fSpeed" min={60} max={200} value={speed} onChange={(e) => setPref('speed', +e.target.value / 100)} />
     </div>
-    <div className="row"><label htmlFor="fCam">{cameraSpeedTitle}<span className="rv" id="rvCam">{cam}%</span></label>
-      <input id="fCam" type="range" min={30} max={250} value={cam} onChange={(e) => setPref('camRate', +e.target.value / 100)} />
+    <div className="row">
+      <label htmlFor="fCam">{cameraSpeedTitle}<span className="rv" id="rvCam">{cam}%</span></label>
+      <Slider id="fCam" min={30} max={250} value={cam} onChange={(e) => setPref('camRate', +e.target.value / 100)} />
     </div>
     <Toggle label={beatLinesTitle} k="showCells" />
     <Toggle label={fretNumbersTitle} k="showNums" />
