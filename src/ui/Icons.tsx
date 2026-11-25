@@ -1,0 +1,17 @@
+import type { SVGProps } from 'react';
+const b = (p: SVGProps<SVGSVGElement>) => ({ viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, ...p });
+export const IconPlay = () => <svg {...b({ fill: 'currentColor', stroke: 'none' })}><path d="M8 5.5v13l11-6.5z" /></svg>;
+export const IconPause = () => <svg {...b({ fill: 'currentColor', stroke: 'none' })}><rect x="7" y="5.5" width="3.6" height="13" rx="1" /><rect x="13.4" y="5.5" width="3.6" height="13" rx="1" /></svg>;
+export const IconRestart = () => <svg {...b({})}><path d="M4 12a8 8 0 1 0 2.6-5.9" /><path d="M4 4v4h4" /></svg>;
+export const IconPrev = () => <svg {...b({ fill: 'currentColor', stroke: 'none' })}><rect x="5" y="6" width="2.2" height="12" rx="1" /><path d="M19 6.5v11l-9-5.5z" /></svg>;
+export const IconNext = () => <svg {...b({ fill: 'currentColor', stroke: 'none' })}><rect x="16.8" y="6" width="2.2" height="12" rx="1" /><path d="M5 6.5v11l9-5.5z" /></svg>;
+export const IconLoop = () => <svg {...b({})}><path d="M4 9.5A3.5 3.5 0 0 1 7.5 6H17l-2.5-2.5M20 14.5A3.5 3.5 0 0 1 16.5 18H7l2.5 2.5" /></svg>;
+export const IconMute = ({ on }: { on: boolean }) => <svg {...b({})}><path d="M4 9.5h3.5L12 5.5v13L7.5 14.5H4z" />{on ? <path d="M16 9.5l4.5 5M20.5 9.5l-4.5 5" /> : <><path d="M15.5 9a4 4 0 0 1 0 6" /><path d="M18 6.8a7.5 7.5 0 0 1 0 10.4" /></>}</svg>;
+export const IconSpeed = () => <svg {...b({})}><path d="M4.5 17a8 8 0 1 1 15 0" /><path d="M12 13.5l4-4" /><circle cx="12" cy="14" r="1.4" fill="currentColor" stroke="none" /></svg>;
+export const IconClick = () => <svg {...b({})}><path d="M9 4h6l3.5 16h-13z" /><path d="M12 18V8.5l5-3" /></svg>;
+export const IconSynth = () => <svg {...b({})}><path d="M3 12h2.5l2-6 3 13 3-10 2 5H21" /></svg>;
+export const IconTab = () => <svg {...b({})}><path d="M4 6h16M4 10h16M4 14h16M4 18h16" /><path d="M9 4v16M15 4v16" strokeWidth="1.1" /></svg>;
+export const IconOpen = () => <svg {...b({})}><path d="M4 7.5A1.5 1.5 0 0 1 5.5 6h3.7l1.6 2H18a1.5 1.5 0 0 1 1.5 1.5v7A1.5 1.5 0 0 1 18 18H5.5A1.5 1.5 0 0 1 4 16.5z" /></svg>;
+export const IconGear = () => <svg {...b({})}><circle cx="12" cy="12" r="3" /><path d="M12 3.5v2M12 18.5v2M3.5 12h2M18.5 12h2M6 6l1.4 1.4M16.6 16.6L18 18M18 6l-1.4 1.4M7.4 16.6L6 18" /></svg>;
+export const IconGuitar = () => <svg {...b({})}><path d="M14.5 4.5l5 5M16.5 6.5l-6.2 6.2" /><path d="M10.3 12.7a3.6 3.6 0 1 0-4.6 4.6 3.6 3.6 0 1 0 4.6-4.6z" /></svg>;
+export const IconDrop = () => <svg {...b({ strokeWidth: 1.5 })}><path d="M12 3.5v11" /><path d="M7.5 10.5L12 15l4.5-4.5" /><path d="M4 16.5v2A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5v-2" /></svg>;

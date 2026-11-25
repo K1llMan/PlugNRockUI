@@ -1,0 +1,27 @@
+{
+    "highwayHeader": "Highway",
+    "noteSpeedTitle": "Note speed",
+    "cameraSpeedTitle": "Camera speed",
+    "beatLinesTitle": "Beat lines",
+    "fretNumbersTitle": "Fret numbers",
+    "techniqueMarksTitle": "Technique marks",
+    "lyricsTitle": "Lyrics",
+    "dynamicCameraTitle": "Dynamic camera",
+    "invertStringsTitle": "Invert strings",
+    "leftHandTitle": "Left-handed",
+    "fingerPositionTitle": "Finger position",
+    "chordNamesTitle": "Chord names",
+    "chordDiagramTitle": "Chord diagram" ,
+    "noteHitLightTitle": "Note-hit light",
+
+    "performanceHeader": "Performance",
+    "renderScaleTitle": "Render scale",
+    "sharpestOption": "sharpest",
+    "fastestOption": "fastest",
+    "visualEffectsTitle": "Visual effects (glow)",
+    "autoResolutionTitle": "Auto resolution",
+
+    "syncHeader": "Sync",
+    "noteOffsetTitle": "Note offset",
+    "keysHint": "Space play/pause · ←/→ 1 s · [ ] section · L loop · R restart · M mute · C metronome · N note synth · T tab view · O options · ,. nudge ±1 ms"
+}

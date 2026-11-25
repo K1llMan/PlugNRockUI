@@ -1,0 +1,10 @@
+{
+    "appName": "PlugNRock",
+    "dropSong": "Drop to play this song",
+    "dropMessage": ".feedpak, .sloppak, an unpacked pack folder, or arrangement .xml / .json with its audio - only songs you have obtained legally",
+    "play": "Play (Space)",
+    "darkTheme": "Dark theme",
+    "lightTheme": "Light theme",
+    "highway": "Highway",
+    "tabView": "Tab view"
+}

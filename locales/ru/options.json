@@ -1,0 +1,27 @@
+{
+    "highwayHeader": "3D-дорожка",
+    "noteSpeedTitle": "Скорость нот",
+    "cameraSpeedTitle": "Скорость камеры",
+    "beatLinesTitle": "Линии тактов",
+    "fretNumbersTitle": "Номера ладов",
+    "techniqueMarksTitle": "Отметки приёмов",
+    "lyricsTitle": "Лирика",
+    "dynamicCameraTitle": "Динамическая камера",
+    "invertStringsTitle": "Инверсия струн",
+    "leftHandTitle": "Левая рука",
+    "fingerPositionTitle": "Позиция пальцев",
+    "chordNamesTitle": "Названия аккордов",
+    "chordDiagramTitle": "Диаграмма аккордов" ,
+    "noteHitLightTitle": "Индикатор удара ноты",
+
+    "performanceHeader": "Производительность",
+    "renderScaleTitle": "Качество отрисовки",
+    "sharpestOption": "чёткость",
+    "fastestOption": "скорость",
+    "visualEffectsTitle": "Визуальные эффекты (свечение)",
+    "autoResolutionTitle": "Автоматическое разрешение",
+
+    "syncHeader": "Синхронизация",
+    "noteOffsetTitle": "Смещение нот",
+    "keysHint": "Space воспроизведение/пауза · ←/→ 1 s · [ ] секции · L цикл · R перезапуск · M заглушить · C метроном · N синхронизация нот · T представление табами · O опции · ,. смещение нот ±1 ms"
+}

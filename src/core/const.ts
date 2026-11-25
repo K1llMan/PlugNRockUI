@@ -1,0 +1,16 @@
+export const LANE = ['#ff2b2b', '#ffd21f', '#1e9bff', '#ff8a1e', '#3ee83e', '#d030ff'];
+export const FONT = "'Century Gothic','Futura','Tw Cen MT','Trebuchet MS','Segoe UI',sans-serif";
+export const GREY_NOTE = '#8d959e';
+export const FW = 0.0855, PITCH = FW * 0.31, YLO = FW * 0.22, NECK_END = FW * 24;
+export const SCROLL_BASE = 1.5, ZFAR = 6.2, LOOK = 12, LOOK_BACK = 1.5, REPEAT_GAP = 3;
+export const INLAY = new Set([3, 5, 7, 9, 12, 15, 17, 19, 21, 24]);
+export const CAM_EASE = 0.85, FOV = 50 * Math.PI / 180, CAM_ELEV = 24 * Math.PI / 180, CAM_YAW = 6.5 * Math.PI / 180;
+export const SUS_MIN = 0.06, SUS_MIN_MOVING = 0.012, HOLD_GAP = 3;
+export const FING_IN = 0.3, FING_GAP = 0.6, FING_MOVE = 0.25, FING_Z = FW * 1.1;
+export const NUM_FADE0 = 6, NUM_FADE1 = 12, VIB_HZ = 5.5, VIB_AMP = PITCH * 0.26;
+export const LYR_GAP = 5, LYR_LEAD = 3, LOOP_LEAD = 2, HOLD_MS = 250, SWITCH_FADE = 1, REST_HEAD_START = 0.6;
+export const OPEN_GTR = [40, 45, 50, 55, 59, 64], OPEN_BASS = [28, 33, 38, 43];
+export const HARMONIC: Record<number, number> = { 12: 12, 24: 24, 7: 19, 19: 19, 5: 24, 4: 28, 9: 28, 16: 28, 3: 31 };
+export const NOTE_NAMES = ['C', 'C♯', 'D', 'E♭', 'E', 'F', 'F♯', 'G', 'A♭', 'A', 'B♭', 'B'];
+export const NAMED_TUNINGS: Record<string, string> = { '-2,0,0,0,-2,-2': 'DADGAD', '-2,-2,0,0,0,-2': 'Open G', '-2,0,0,-1,-2,-2': 'Open D', '0,2,2,1,0,0': 'Open E', '0,0,2,2,2,0': 'Open A' };
+export const SECCOL: Record<string, string> = { riff: '#2c5b93', verse: '#3f7fbe', prechorus: '#5b4b9e', chorus: '#6b4bb0', solo: '#a8842c', intro: '#39434d', outro: '#39434d', bridge: '#2f7d78' };

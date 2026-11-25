@@ -1,0 +1,13 @@
+{
+    "arrangement": "ARRANGEMENT",
+    "section": "SECTION",
+    "toneStr": "TONE",
+    "toneSwitch": "TONE SWITCH",
+    "noteSpeed": "NOTE SPEED",
+    "lyricError": "Lyric load error!",
+    "dropSong": "Drop a song here",
+    "dropMsg1": "Drag a <b>.feedpak</b> or <b>.sloppak</b> file onto this window to see and hear its chart on a 3-D note highway or as tablature.",
+    "dropMsg2": "Charting a song? Drop its arrangement <b>.xml</b> files together with the audio (and cover art), or the whole project folder.",
+    "chooseFile": "Choose a file…",
+    "legalHint": "Please use only songs you have obtained legally. <b>{appName}</b> is an independent, non-commercial project based on <b>Play Song</b>; it does not provide any songs and is not affiliated with any game publisher or rights holder."
+}
