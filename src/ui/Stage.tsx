@@ -6,9 +6,9 @@ import { useUi } from '../core/store';
 import { onFrame } from '../core/store';
 import { STATE, chartTime } from '../core/state';
 import { attachCanvas, resize } from '../render/surface';
-import { BARS, barAt, barSeek, inBars } from '../render/parts';
+import { attachHighway } from '../render/highway';
+import { barAt, barSeek, inBars } from '../render/parts';
 import { SEL, barDragEnd, barDragMove, barDragStart, clearLoopBars } from '../core/loop';
-import { seek } from '../core/audio';
 import { inputLocked } from '../core/store';
 import { clamp } from '../core/util';
 import { pickFiles } from '../core/files';
@@ -20,6 +20,7 @@ function HighwayCanvas() {
 
   useEffect(() => {
     attachCanvas(ref.current!);
+    attachHighway(ref.current!);
     const r = () => resize();
     window.addEventListener('resize', r);
     return () => window.removeEventListener('resize', r);
