@@ -1,19 +1,8 @@
 {
     "noSection": "no sections in this chart",
     "tuningHint": "Tuning of the arrangement, lowest string first",
-    "restartHint": "Restart (R)",
-    "prevSectionHint": "Previous section ([)",
-    "pauseHint": "Pause (Space)",
-    "playHint": "Play (Space)",
-    "nextSectionHint": "Next section (])",
-    "loopSectionHint": "Loop section (L)",
-    "tabViewHint": "Tab view (T)",
     "tabTitle": "Tab",
-    "muteHint": "Mute (M)",
     "songSpeedHint": "Song speed 100%",
-    "metronomeHint": "Metronome (C)",
-    "noteSynthHint": "Note synth (N)",
     "openSongHint": "Open a song",
     "openTitle": "Open",
-    "optionsHint": "Options (O)"
 }

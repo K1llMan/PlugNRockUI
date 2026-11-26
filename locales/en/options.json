@@ -23,5 +23,6 @@
 
     "syncHeader": "Sync",
     "noteOffsetTitle": "Note offset",
-    "keysHint": "Space play/pause · ←/→ 1 s · [ ] section · L loop · R restart · M mute · C metronome · N note synth · T tab view · O options · ,. nudge ±1 ms"
+
+    "controlsHeader": "Controls",
 }

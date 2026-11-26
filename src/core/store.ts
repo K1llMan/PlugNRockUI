@@ -32,11 +32,22 @@ export const ui = {
   get: () => state,
   set(p: Partial<UiState>) {
     let ch = false;
-    for (const k in p) if (!Object.is(state[k as keyof UiState], p[k as keyof UiState])) { ch = true; break; }
-    if (!ch) return;
-    state = { ...state, ...p }; subs.forEach((f) => f());
+    for (const k in p)
+      if (!Object.is(state[k as keyof UiState], p[k as keyof UiState])) {
+        ch = true;
+        break;
+      }
+    if (!ch)
+      return;
+    state = { ...state, ...p }; 
+    subs.forEach((f) => f());
   },
-  sub(f: () => void) { subs.add(f); return () => { subs.delete(f); }; },
+  sub(f: () => void) { 
+    subs.add(f); 
+    return () => { 
+      subs.delete(f); 
+    }; 
+  },
 };
 export function useUi<T>(sel: (s: UiState) => T): T {
   return useSyncExternalStore(ui.sub, () => sel(state), () => sel(state));

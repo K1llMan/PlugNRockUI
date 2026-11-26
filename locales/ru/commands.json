@@ -1,0 +1,34 @@
+{
+    "commandTitle": "Команда",
+    "keybindingTitle": "Клавиши",
+    "whenTitle": "Когда",
+    "sourceTitle": "Источник",
+    "actionsTitle": "Действие",
+
+    "buttonSearchMsg": "Нажмите желаемое сочетание клавиш...",
+    "commandSearchMsg": "Поиск по командам или клавишам...",
+    "searchButtonHint": "Поиск по нажатию клавиш",
+    "searchButtonTitle": "Запись клавиш",
+    "resetButtonTitle": "Сброс",
+
+    "modalHint": "Нажмите желаемую комбинацию клавиш и затем нажмите <b>ENTER</b> (<b>ESC</b> для отмены)",
+    "modalError": "Конфликт: уже назначено на",
+
+    "playPause": "Воспроизведение/Пауза",
+    "restart": "Рестарт",
+    "prevSection": "Предыдущая секция",
+    "nextSection": "Следующая секция",
+    "loopSection": "Зациклить секцию",
+    "tabView": "Табулатура",
+    "mute": "Заглушить",
+    "metronome": "Метроном",
+    "noteSynth": "Синтезатор нот",
+    "options": "Опции",
+    "stepBackward": "Прокрутка назад",
+    "fastStepBackward": "Быстрая прокрутка назад",
+    "stepForward": "Прокрутка вперёд",
+    "fastStepForward": "Быстрая прокрутка вперёд",
+    "offsetPlus": "Смещение +1 ms",
+    "offsetMinus": "Смещение -1 ms",
+    "arrangement": "Аранжировка"
+}

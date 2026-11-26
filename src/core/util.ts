@@ -1,6 +1,12 @@
 import { SECCOL, SUS_MIN, SUS_MIN_MOVING } from './const';
 import type { RNote, WireNote } from '../types';
 
+export function combineClassNames(names: string[]) {
+    return names
+        .filter((v: string) => v != null && v.trim() != '')
+        .join(' ');
+}
+
 export const clamp = (v: number, a: number, b: number) => (v < a ? a : v > b ? b : v);
 export const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 export const sstep = (u: number) => { u = clamp(u, 0, 1); return u * u * (3 - 2 * u); };

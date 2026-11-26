@@ -1,19 +1,8 @@
 {
     "noSection": "секции отсутствуют",
     "tuningHint": "Строй аранжировки, от нижней струны",
-    "restartHint": "Рестарт (R)",
-    "prevSectionHint": "Предыдущая секция ([)",
-    "pauseHint": "Пауза (Space)",
-    "playHint": "Воспроизведение (Space)",
-    "nextSectionHint": "Следующая секция (])",
-    "loopSectionHint": "Зациклить секцию (L)",
-    "tabViewHint": "Представление табами (T)",
     "tabTitle": "Табы",
-    "muteHint": "Заглушить (M)",
     "songSpeedHint": "Скорость песни 100%",
-    "metronomeHint": "Метроном (C)",
-    "noteSynthHint": "Синхронизация нот (N)",
     "openSongHint": "Открыть песню",
     "openTitle": "Открыть",
-    "optionsHint": "Опции (O)"
 }
