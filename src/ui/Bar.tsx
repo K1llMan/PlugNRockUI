@@ -1,7 +1,12 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { useIntlayer } from 'react-intlayer';
 
+import { 
+  IconClick, IconGear, IconHeadstock, IconLoop, IconMute, IconNext, IconOpen, IconPause, IconPlay, IconPrev, IconRestart, IconSpeed, IconStem, IconSynth, IconTab 
+} from './Icons';
 import { Slider } from '../components/Slider';
+import { useShortcuts } from '../components/ShortcutsContext';
+import { Select } from '../components/Select';
 
 import { useUi, onFrame, ui } from '../core/store';
 import { STATE } from '../core/state';
@@ -14,7 +19,7 @@ import { setPref } from '../core/prefs';
 import { changeStem } from '../core/session';
 import { pickFiles } from '../core/files';
 import { inputLocked } from '../core/store';
-import { IconClick, IconGear, IconGuitar, IconLoop, IconMute, IconNext, IconOpen, IconPause, IconPlay, IconPrev, IconRestart, IconSpeed, IconSynth, IconTab } from './Icons';
+
 
 function SeekBar() {
   const { noSection } = useIntlayer("bar");
@@ -96,11 +101,56 @@ function SeekBar() {
   </div>;
 }
 
+function ArrangementSelect({ arrangements, selected }: { arrangements: { name: string }[], selected: number }) {
+  let opt = [{ value: 0, name: '-' }];
+  if (arrangements.length)
+    opt = arrangements
+      .map((a: { name: string }, i: number) => {
+        return {
+          name: a.name || 'arr ' + i,
+          value: i
+        }
+      });
+
+  return <div id="path" className={arrangements.length < 2 ? 'one' : ''}>
+    <IconHeadstock />
+    <Select
+      options={opt}
+      selectedOption={selected}
+      onChange={(value) => { selectArrangement(+value); }}
+    />
+  </div>
+}
+
+function StemSelect({ stems, selected }: { stems: { id: string }[], selected: string }) {
+  let opt = [{ value: "", name: "Full mix" }];
+
+  if (stems.length)
+    opt.push(...stems
+      .map((s: { id: string }, i: number) => {
+        return {
+          value: s.id,
+          name: s.id.charAt(0).toUpperCase() + s.id.slice(1)
+        }
+      })
+    );
+
+  return <div id="stem" style={{ display: stems.length > 1 ? 'flex' : 'none' }}>
+    <IconStem />
+    <Select
+      options={opt}
+      selectedOption={selected}
+      onChange={(value) => { void changeStem(value); }}
+    />
+  </div>
+}
+
 export default function Bar() {
   const {
-    tuningHint, restartHint, prevSectionHint, pauseHint, playHint, nextSectionHint, loopSectionHint, tabViewHint, tabTitle,
-    muteHint, songSpeedHint, metronomeHint, noteSynthHint, openSongHint, openTitle, optionsHint
+    tuningHint, tabTitle, songSpeedHint, openSongHint, openTitle
   } = useIntlayer("bar");
+
+  const shortcuts = useShortcuts();
 
   const s = useUi((x) => x);
   return <div id="bar">
@@ -117,36 +167,28 @@ export default function Bar() {
         </div>
       </div>
       <div id="btns">
-        <div id="path" className={s.arrs.length < 2 ? 'one' : ''}>
-          <IconGuitar />
-          <select id="fArr" value={s.arrIdx} onChange={(e) => { selectArrangement(+e.target.value); e.currentTarget.blur(); }}>
-            {s.arrs.length ? s.arrs.map((a, i) => <option key={i} value={i}>{a.name || 'arr ' + i}</option>) : <option value={0}>—</option>}
-          </select>
+        <div className="stack">
+          <ArrangementSelect arrangements={s.arrs} selected={s.arrIdx} />
+          <StemSelect stems={s.stems} selected={s.stemId} />
         </div>
-        <div id="stem" style={{ display: s.stems.length > 1 ? 'flex' : 'none' }}>
-          <select id="stemSel" value={s.stemId} onChange={(e) => { void changeStem(e.target.value); e.currentTarget.blur(); }}>
-            <option value="">Full mix</option>
-            {s.stems.map((x) => <option key={x.id} value={x.id}>{x.id.charAt(0).toUpperCase() + x.id.slice(1)}</option>)}
-          </select>
-        </div>
-        <button className="ib" id="bRestart" title={restartHint} onClick={() => seek(0)}><IconRestart /></button>
-        <button className="ib" id="bPrev" title={prevSectionHint} onClick={() => { const x = sectionAt(STATE.time - 0.25); seek(x ? x.start : 0); }}><IconPrev /></button>
-        <button className={'ib' + (s.playing ? ' on' : '')} id="bPlay" title={s.playing ? pauseHint : playHint} onClick={togglePlay}>{s.playing ? <IconPause /> : <IconPlay />}</button>
-        <button className="ib" id="bNext" title={nextSectionHint} onClick={() => {
+        <button className="ib" id="bRestart" title={shortcuts.tooltip('restart')} onClick={() => seek(0)}><IconRestart /></button>
+        <button className="ib" id="bPrev" title={shortcuts.tooltip('prevSection')} onClick={() => { const x = sectionAt(STATE.time - 0.25); seek(x ? x.start : 0); }}><IconPrev /></button>
+        <button className={'ib' + (s.playing ? ' on' : '')} id="bPlay" title={shortcuts.tooltip('playPause')} onClick={togglePlay}>{s.playing ? <IconPause /> : <IconPlay />}</button>
+        <button className="ib" id="bNext" title={shortcuts.tooltip('nextSection')} onClick={() => {
           const x = sectionAt(STATE.time + 0.05);
           if (x && x.idx + 1 < STATE.sections.length)
             seek(STATE.sections[x.idx + 1].time);
           else
             seek(STATE.duration - 0.05);
         }}><IconNext /></button>
-        <button className={'ib' + (s.loop ? ' on' : '')} id="bLoop" title={loopSectionHint} onClick={toggleSectionLoop}><IconLoop /></button>
-        <button className={'ib' + (s.tabView ? ' on' : '')} id="bTab" title={tabViewHint} onClick={() => setPref('tabView', !STATE.tabView)}><IconTab /><span>{tabTitle}</span></button>
+        <button className={'ib' + (s.loop ? ' on' : '')} id="bLoop" title={shortcuts.tooltip('loopSection')} onClick={toggleSectionLoop}><IconLoop /></button>
+        <button className={'ib' + (s.tabView ? ' on' : '')} id="bTab" title={shortcuts.tooltip('tabView')} onClick={() => setPref('tabView', !STATE.tabView)}><IconTab /><span>{tabTitle}</span></button>
       </div>
 
       <div id="tools">
         <div className="stack">
           <div className="vol">
-            <button className={'ib' + (s.muted ? ' on' : '')} id="bMute" title={muteHint} onClick={() => setPref('muted', !STATE.muted)}><IconMute on={s.muted} /></button>
+            <button className={'ib' + (s.muted ? ' on' : '')} id="bMute" title={shortcuts.tooltip('mute')} onClick={() => setPref('muted', !STATE.muted)}><IconMute on={s.muted} /></button>
             <Slider min={0} max={100} value={s.master} onChange={(e) => setPref('master', +e.target.value / 100)} />
             <span className="val" id="lMaster">{s.master}</span>
           </div>
@@ -158,12 +200,12 @@ export default function Bar() {
         </div>
         <div className="stack">
           <div className="vol">
-            <button className={'ib' + (s.clickOn ? ' on' : '')} id="bClick" title={metronomeHint} onClick={() => setPref('clickOn', !STATE.clickOn)}><IconClick /></button>
+            <button className={'ib' + (s.clickOn ? ' on' : '')} id="bClick" title={shortcuts.tooltip('metronome')} onClick={() => setPref('clickOn', !STATE.clickOn)}><IconClick /></button>
             <Slider min={0} max={100} value={s.clickLevel} onChange={(e) => setPref('clickLevel', +e.target.value / 100)} />
             <span className="val" id="lClick">{s.clickLevel}</span>
           </div>
           <div className="vol">
-            <button className={'ib' + (s.synthOn ? ' on' : '')} id="bSynth" title={noteSynthHint} onClick={() => setPref('synthOn', !STATE.synthOn)}><IconSynth /></button>
+            <button className={'ib' + (s.synthOn ? ' on' : '')} id="bSynth" title={shortcuts.tooltip('noteSynth')} onClick={() => setPref('synthOn', !STATE.synthOn)}><IconSynth /></button>
             <Slider min={0} max={100} value={s.synthLevel} onChange={(e) => setPref('synthLevel', +e.target.value / 100)} />
             <span className="val" id="lSynth">{s.synthLevel}</span>
           </div>
@@ -173,7 +215,7 @@ export default function Bar() {
           <div id="fps">{s.fps} FPS{s.autoScale && s.dynScale < 0.999 ? ' · ' + Math.round(s.dynScale * 100) + '%' : ''}</div>
         </div>
         <button className="ib" id="bOpen" title={openSongHint} onClick={pickFiles}><IconOpen /><span>{openTitle}</span></button>
-        <button className={'ib' + (s.cfgOpen ? ' on' : '')} id="bCfg" title={optionsHint} onClick={() => ui.set({ cfgOpen: !s.cfgOpen })}><IconGear /></button>
+        <button className={'ib' + (s.cfgOpen ? ' on' : '')} id="bCfg" title={shortcuts.tooltip('options')} onClick={() => ui.set({ cfgOpen: !s.cfgOpen })}><IconGear /></button>
       </div>
     </div>
   </div>;

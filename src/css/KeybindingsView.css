@@ -1,0 +1,178 @@
+.kb-container {
+    --scrim: rgba(0, 0, 0, 0.6);
+
+    padding: 16px;
+}
+
+/* Панель поиска */
+.kb-toolbar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.kb-search-input {
+    flex: 1;
+    padding: 6px 10px;
+    background: var(--surface-container-highest);
+    color: var(--on-surface);
+    border: 1px solid var(--surface-container-highest);
+    outline: none;
+    font-size: 13px;
+}
+
+.kb-search-input:focus,
+.kb-search-input--recording {
+    border-color: var(--primary);
+}
+
+.kb-record-btn {
+    padding: 6px 12px;
+    background: var(--surface-container-high);
+    color: var(--on-surface);
+    border: 1px solid var(--outline);
+    cursor: pointer;
+    font-size: 13px;
+    transition: background 0.15s;
+}
+
+.kb-record-btn:hover {
+    background: var(--surface-container-highest);
+}
+
+.kb-record-btn--active {
+    background: var(--primary);
+    color: var(--on-primary);
+    border-color: var(--primary);
+}
+
+.kb-record-btn--active:hover {
+    background: var(--primary-container);
+    color: var(--on-primary-container);
+}
+
+/* Таблица */
+.kb-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    text-align: left;
+}
+
+.kb-table th {
+    padding: 8px;
+    border-bottom: 1px solid var(--outline-variant);
+    color: var(--on-surface-variant);
+    opacity: 0.7;
+    font-weight: 600;
+}
+
+.kb-row {
+    border-bottom: 1px solid var(--outline-variant);
+    cursor: pointer;
+}
+
+.kb-row:hover {
+    background: var(--surface-container);
+}
+
+.kb-cell {
+    padding: 8px;
+}
+
+.kb-category {
+    color: var(--on-surface-variant);
+    opacity: 0.7;
+}
+
+.kb-title {
+    color: var(--on-surface);
+}
+
+.kb-when {
+    font-family: 'Fira Code', Consolas, monospace;
+    color: var(--secondary);
+}
+
+.kb-source {
+    color: var(--on-surface-variant);
+    opacity: 0.7;
+}
+
+.kb-reset-btn {
+    background: transparent;
+    color: var(--primary);
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 0;
+}
+
+.kb-reset-btn:hover {
+    text-decoration: underline;
+}
+
+/* Бейджи клавиш (<kbd>) */
+.kb-badges {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.kb-empty {
+    opacity: 0.4;
+}
+
+.kb-kbd {
+    padding: 2px 6px;
+    font-size: 12px;
+    font-family: inherit;
+    background: var(--surface-container-high);
+    color: var(--on-surface-variant);
+    border: 1px solid var(--outline-variant);
+    border-radius: 3px;
+    box-shadow: inset 0 -1px 0 var(--outline-variant);
+}
+
+/* Модальное окно записи */
+.kb-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--scrim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
+    z-index: 1000;
+}
+
+.kb-modal {
+    background: var(--surface-container-low);
+    border: 1px solid var(--outline);
+    padding: 20px;
+    width: 400px;
+    text-align: center;
+    box-shadow: 0 8px 24px var(--scrim);
+}
+
+.kb-modal-hint {
+    margin: 0 0 12px;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.kb-modal-preview {
+    padding: 12px;
+    background: var(--surface);
+    margin-bottom: 12px;
+    min-height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.kb-modal-warning {
+    color: var(--tertiary);
+    font-size: 12px;
+    margin: 0;
+}

@@ -1,0 +1,113 @@
+.Select {
+    display: flex;
+    flex-grow: 1;
+
+    margin: 1px !important;
+    border: 1px solid var(--outline-variant);
+    border-radius: 4px;
+
+    cursor: pointer;
+    outline: none;
+}
+
+.Select .selectBox {
+    display: flex;
+    flex-grow: 1;
+
+    align-items: center;
+    user-select: none;
+}
+
+.Select .selectBox > .header {
+    display: flex;
+    flex-grow: 1;
+
+    padding: 0 4px 0 8px;
+    align-items: center;
+}
+
+.Select .selectBox .arrow {
+    display: flex;
+
+    border: none;
+    background-color: transparent;
+
+    padding: 3px 4px;
+}
+
+.Select .selectBox .arrow > * {
+    font-size: 16px;
+}
+
+.Select .selectBox .arrow:hover {
+    color: var(--primary);
+}
+
+.Select .selectBox .arrow:hover:active {
+    color: var(--on-primary);
+}
+
+.Select .selectBox .arrow:disabled {
+    color: var(--on-surface-variant);
+    pointer-events: none;
+}
+
+.Select .selectBox .arrow.show {
+    transform: rotateZ(180deg);
+}
+
+.Select .options {
+    display: flex;
+    visibility: hidden;
+    position: absolute;
+
+    background-color: var(--surface-container);
+
+    border: 1px solid var(--outline-variant);
+    border-radius: 1px;
+
+    z-index: 99999;
+}
+
+.Select .options .options-content {
+    display: flex;
+    flex-flow: column;
+    max-height: 200px;
+}
+
+.Select .options .opt {
+    display: flex;
+    align-items: center;
+
+    min-height: 24px;
+
+    color: var(--on-surface-container);
+
+    cursor: pointer;
+    user-select: none;
+}
+.Select .options .opt .value {
+    margin: 0 8px;
+}
+
+.Select .options .opt.selected {
+    background-color: var(--primary);
+    color: var(--on-primary);
+}
+
+.Select .options .opt:hover {
+    background-color: var(--primary);
+    color: var(--on-primary);
+}
+
+.Select .options.show {
+    //visibility: visible;
+    flex-flow: column;       
+}
+
+.Select.disabled {
+    border: 1px solid var(--outline--outline-variant);
+    color: rgb(from var(--outline--outline-variant) r g b / 0.38);
+    cursor: default;
+    pointer-events: none;
+}

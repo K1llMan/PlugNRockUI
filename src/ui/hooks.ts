@@ -17,27 +17,10 @@ export function useGlobalInput() {
       const el = e.target as HTMLElement;
       if (el.tagName === 'SELECT' || (el.tagName === 'INPUT' && (el as HTMLInputElement).type !== 'range')) return;
       const k = e.key;
-      if (el.tagName === 'INPUT' && k.startsWith('Arrow')) return;
-      if (k === ' ') { e.preventDefault(); togglePlay(); }
-      else if (unlockAudio()) return;
-      else if (k === 'm' || k === 'M') setPref('muted', !STATE.muted);
-      else if (k === 'c' || k === 'C') setPref('clickOn', !STATE.clickOn);
-      else if (k === 'n' || k === 'N') setPref('synthOn', !STATE.synthOn);
-      else if (k === 't' || k === 'T') setPref('tabView', !STATE.tabView);
-      else if (k === 'ArrowLeft') seek(STATE.time - (e.shiftKey ? 5 : 1));
-      else if (k === 'ArrowRight') seek(STATE.time + (e.shiftKey ? 5 : 1));
-      else if (k === '[') {
-        const s = sectionAt(STATE.time - 0.25);
-        seek(s ? (s.start > STATE.time - 0.6 ? (sectionAt(s.start - 0.1) || s).start : s.start) : 0);
-      } else if (k === ']') {
-        const s = sectionAt(STATE.time + 0.05);
-        if (s && s.idx + 1 < STATE.sections.length) seek(STATE.sections[s.idx + 1].time);
-      } else if (k === 'l' || k === 'L') document.getElementById('bLoop')?.click();
-      else if (k === 'r' || k === 'R') seek(0);
-      else if (k === 'o' || k === 'O') ui.set({ cfgOpen: !ui.get().cfgOpen });
-      else if (k === ',') applyOffset(STATE.offMs - 1);
-      else if (k === '.') applyOffset(STATE.offMs + 1);
-      else if (k >= '1' && k <= '6') { const i = +k - 1; if (i < STATE.arrs.length) selectArrangement(i); }
+      if (el.tagName === 'INPUT' && k.startsWith('Arrow')) 
+        return;
+      if (unlockAudio()) 
+        return;
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);

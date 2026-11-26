@@ -36,7 +36,29 @@
 }
 
 * {
-    box-sizing: border-box
+    box-sizing: border-box;
+}
+
+
+*::-webkit-scrollbar {
+    width: 8px
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #2b3d5c;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    color: var(--outline)
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
 
 html,
@@ -631,6 +653,8 @@ body.locked {
     overflow: hidden;
     background: var(--surface-container);
     border-top: 1px solid var(--outline-variant);
+
+    height: 128px;
 }
 
 #seek {
@@ -852,11 +876,14 @@ body.locked {
     flex: none;
     display: flex;
     flex-direction: column;
-    gap: 2px
+}
+
+.stack > *:not(:last-child) {
+    margin-bottom: 2px;
 }
 
 .stack .vol {
-    height: 27px
+    height: 30px
 }
 
 .stack .ib {
@@ -866,8 +893,8 @@ body.locked {
 }
 
 .stack .ib svg {
-    width: 16px;
-    height: 16px
+    width: 24px;
+    height: 24px
 }
 
 .stack .val {
@@ -902,13 +929,13 @@ body.locked {
     border-radius: 6px;
     cursor: pointer;
     padding: 0;
-    color: var(--on-surface);
+    color: var(--on-surface-variant);
 }
 
 .ib:hover,
 .ib.on:hover {
     background-color: var(--surface-container-high);
-    border-color: var(--outline-variant);
+    color: var(--on-surface);
 }
 
 .ib:active
@@ -924,7 +951,8 @@ body.locked {
 }
 
 .ib.on {
-    background: var(--surface-container-high);
+    background-color: var(--surface-container-high);
+    border-color: var(--outline-variant);
 }
 
 #bPlay {
@@ -964,68 +992,24 @@ body.locked {
     min-width: 0
 }
 
-#stem {
-    flex: none;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--on-surface);
-    background-color: var(--surface-container-high);
-    border: 1px solid var(--outline-variant);
-    border-radius: 6px;
-    padding: 0 8px;
-    height: 32px
-}
-
-#stem select {
-    background: transparent;
-    border: 0;
-    color: var(--on-surface);
-    font: 12.5px "Segoe UI", system-ui, sans-serif;
-    outline: none;
-    cursor: pointer;
-    max-width: 118px
-}
-
-#stem select option {
-    color: var(--on-surface);
-    background-color: var(--surface-container-high);
-}
-
+#stem,
 #path {
-    flex: none;
+    width: 120px;
+}
+
+#stem,
+#path {
     display: flex;
     align-items: center;
     gap: 5px;
     color: var(--on-surface);
-    background-color: var(--surface-container-high);
-    border: 1px solid var(--outline-variant);
-    border-radius: 6px;
-    padding: 0 4px 0 8px;
-    height: 32px;
-    margin-right: 6px;
 }
 
+#stem svg,
 #path svg {
-    width: 15px;
-    height: 15px;
-    flex: none
-}
-
-#path select {
-    background: transparent;
-    border: 0;
-    color: var(--on-surface);
-    font: 600 12.5px "Segoe UI", system-ui, sans-serif;
-    outline: none;
-    cursor: pointer;
-    max-width: 120px
-}
-
-#path select option {
-    color: var(--on-surface);
-    background-color: var(--surface-container-high);
-    font-weight: 400
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
 }
 
 #path.one {
@@ -1077,9 +1061,9 @@ body.locked {
 #cfg {
     position: fixed;
     right: 12px;
-    bottom: 130px;
-    width: 350px;
-    max-height: calc(100vh - 144px);
+    bottom: 140px;
+    width: 1000px;
+    height: calc(100vh - 156px);
     overflow-y: auto;
     color: var(--on-surface);
     background: var(--surface-container);
@@ -1088,31 +1072,16 @@ body.locked {
     box-shadow: 0 12px 32px #000a;
     padding: 12px;
     display: none;
-    z-index: 40;
-    scrollbar-width: thin;
-    scrollbar-color: #35507a #101317
+    z-index: 100;
 }
 
-#cfg::-webkit-scrollbar {
-    width: 9px
-}
-
-#cfg::-webkit-scrollbar-track {
-    background: #101317
-}
-
-#cfg::-webkit-scrollbar-thumb {
-    background: #2b3d5c;
-    border-radius: 5px;
-    border: 2px solid #101317
-}
-
-#cfg::-webkit-scrollbar-thumb:hover {
-    background: #3f6ba8
+#cfg .col {
+    width: 350px;
+    padding: 0 8px;
 }
 
 #cfg.show {
-    display: block
+    display: flex;
 }
 
 #cfg h4 {
@@ -1141,20 +1110,8 @@ body.locked {
     font-size: 12.5px
 }
 
-#cfg select {
-    background: var(--surface-container-low);
-    border: 1px solid var(--outline);
-    color: var(--on-surface);
-    border-radius: 3px;
-    padding: 2px 6px;
-    font: inherit;
-    outline: none;
-    max-width: 150px
-}
-
 #cfg input[type=range] {
     width: 120px;
-    accent-color: #3f8ce0;
 }
 
 #cfg .hint {
@@ -1219,7 +1176,7 @@ body.locked {
     border-color: #4a5560
 }
 
-#cfg button {
+#cfg .offwrap button {
     background: #171b20;
     border: 1px solid #2b3138;
     color: #dfe7ef;
@@ -1229,7 +1186,7 @@ body.locked {
     cursor: pointer
 }
 
-#cfg button:hover {
+#cfg .offwrap button:hover {
     border-color: #4a5560
 }
 

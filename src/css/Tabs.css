@@ -1,0 +1,111 @@
+.Tabs {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+/* Десктопное правило: не растягиваем на 100%, колонки равной ширины по самому длинному табу */
+.Tabs .tablist {
+    display: inline-grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    align-self: flex-start;
+    /* Выравнивание по ведущему краю (слева) */
+    max-width: 100%;
+}
+
+.Tabs .tab {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    padding: 0 24px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: var(--on-surface-variant);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.1px;
+    white-space: nowrap;
+    user-select: none;
+    outline: none;
+    transition: color 0.2s ease;
+}
+
+.Tabs .tab--active {
+    color: var(--primary);
+}
+
+.Tabs .tab:disabled {
+    opacity: 0.38;
+    cursor: not-allowed;
+}
+
+/* State Layer (Hover 8%, Focus 10%) */
+.Tabs .tab__state-layer {
+    position: absolute;
+    inset: 0;
+    background-color: currentColor;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+}
+
+.Tabs .tab:not(:disabled):hover .tab__state-layer {
+    opacity: 0.08;
+}
+
+.Tabs .tab:not(:disabled):focus-visible .tab__state-layer {
+    opacity: 0.12;
+}
+
+.Tabs .tab:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
+}
+
+.Tabs .tab__content {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 100%;
+}
+
+.Tabs .tab__icon {
+    display: flex;
+    font-size: 18px;
+}
+
+/* Индикаторы MD3 */
+.Tabs .tab__indicator {
+    position: absolute;
+    bottom: 0;
+    background-color: var(--primary);
+}
+
+/* Primary: скругленная плашка высотой 3dp под контентом */
+.Tabs .tab__indicator--primary {
+    height: 3px;
+    left: 26px;
+    /* padding 24px + отступ 2dp */
+    right: 26px;
+    min-width: 24px;
+    border-radius: 3px 3px 0 0;
+}
+
+/* Secondary: плоская линия высотой 2dp на всю ширину ячейки таба */
+.Tabs .tab__indicator--secondary {
+    height: 2px;
+    left: 0;
+    right: 0;
+}
+
+.Tabs .tabpanel {
+    border-top: 1px solid var(--outline-variant);
+    padding: 24px 0;
+    outline: none;
+    overflow: auto;
+}
