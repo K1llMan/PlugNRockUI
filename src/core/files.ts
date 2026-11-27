@@ -1,8 +1,12 @@
+import { getIntlayer } from 'intlayer';
+
 import type { DroppedFile, LoadedSong, SongPayload } from '../types';
-import { LOCAL, showSong, restChart, fadeTo, waitForPack, cameraAtRest } from './session';
+import { LOCAL, showSong, restChart, fadeTo, cameraAtRest } from './session';
 import { STATE, FLAGS } from './state';
 import { ui, busy, idle, notice, lockInput, showHint } from './store';
 import { audioInit, AUDIO, pause, fadeOutPlaying } from './audio';
+
+const noticeMessages = getIntlayer('notice');
 
 const AUDIO_RX = /\.(ogg|mp3|wav|flac|m4a|aac|opus|webm|wem)$/i;
 const IMAGE_RX = /\.(jpe?g|png|webp|gif|bmp|dds)$/i;
@@ -25,7 +29,8 @@ function loadScript(src: string) {
 }
 let statics: Promise<void> | null = null;
 export function loadStatics() {
-  if (!statics) statics = (async () => { await loadScript(asset('web/ww2ogg.bundle.js')); await loadScript(asset('web/converter.js')); })();
+  if (!statics) 
+    statics = (async () => { await loadScript(asset('web/ww2ogg.bundle.js')); await loadScript(asset('web/converter.js')); })();
   return statics;
 }
 export function convertWem(bytes: Uint8Array) {
@@ -131,7 +136,7 @@ export async function openSet(list: DroppedFile[], json: boolean, onStage: (s: s
     if (audioF && /\.wem$/i.test(audioF.name)) keep.push(audioF);
     if (imageF && /\.dds$/i.test(imageF.name)) keep.push(imageF);
   }
-  onStage('Reading ' + name + '…');
+  onStage(noticeMessages.reading + name + '…');
   const entries: { name: string; bytes: ArrayBuffer }[] = [];
   for (const f of keep) entries.push({ name: f.relPath || f.name, bytes: await f.arrayBuffer() });
   let r: Result | null = null;
@@ -163,28 +168,17 @@ export async function openSet(list: DroppedFile[], json: boolean, onStage: (s: s
     const dec = (window.CDLC as unknown as { decodeDds?: (b: Uint8Array) => { width: number; height: number; rgba: Uint8Array } }).decodeDds;
     if (dds && dec) { try { const d = dec(new Uint8Array(dds.bytes)); cover = coverFromRgba(d.width, d.height, d.rgba); } catch { /* не DDS */ } }
     if (!cover && imageF && !/\.dds$/i.test(imageF.name)) cover = URL.createObjectURL(imageF);
-    if (wem) { onStage('Converting the audio…'); await new Promise((res) => setTimeout(res, 20)); audio = new Blob([convertWem(new Uint8Array(wem.bytes))], { type: 'audio/ogg' }); }
+    if (wem) { 
+      onStage(noticeMessages.convertingAudio); 
+      await new Promise((res) => setTimeout(res, 20)); audio = new Blob([convertWem(new Uint8Array(wem.bytes))], { type: 'audio/ogg' }); 
+    }
     else if (audioF && !/\.wem$/i.test(audioF.name)) audio = audioF;
   }
   out.payload.meta.cover = !!cover;
   return { payload: out.payload, cover, audio, stems: out.stems?.length ? new Map(out.stems.map((s) => [s.id, s.blob])) : null };
 }
-function upload(file: File, onProgress: (f: number) => void) {
-  return new Promise((resolve, reject) => {
-    const x = new XMLHttpRequest();
-    x.open('POST', '/api/open');
-    x.setRequestHeader('Content-Type', 'application/octet-stream');
-    x.setRequestHeader('X-Filename', encodeURIComponent(file.name));
-    x.upload.onprogress = (e) => { if (e.lengthComputable) onProgress(e.loaded / e.total); };
-    x.onerror = () => reject(new Error('the upload failed - is the server still there?'));
-    x.onload = () => {
-      let d: { error?: string } = {}; try { d = JSON.parse(x.responseText); } catch { /* пусто */ }
-      x.status >= 200 && x.status < 300 && !d.error ? resolve(d) : reject(new Error(d.error || 'HTTP ' + x.status));
-    };
-    x.send(file);
-  });
-}
-export async function openDropped(input: DroppedFile | DroppedFile[], serverOn: boolean) {
+
+export async function openDropped(input: DroppedFile | DroppedFile[]) {
   if (FLAGS.opening) 
     return;
 
@@ -194,7 +188,7 @@ export async function openDropped(input: DroppedFile | DroppedFile[], serverOn: 
     && !list.some((f) => /\.(feedpak|sloppak)$/i.test(f.name) && !f.relPath);
   const file = xmlSet || jsonSet ? null : list.find((f) => /\.(feedpak|sloppak)$/i.test(f.name)) || null;
   if (!xmlSet && !jsonSet && !file) {
-    notice('Only .feedpak, .sloppak, arrangement .xml or .json files can be played - not ' + (list[0]?.name || 'that'));
+    notice(noticeMessages.filesConstraints);
     setTimeout(idle, 5000); 
     return;
   }
@@ -209,9 +203,12 @@ export async function openDropped(input: DroppedFile | DroppedFile[], serverOn: 
     let song: LoadedSong | null = null;
     cleared = fadeTo(0).then(() => { restChart(); STATE.visTo = 1; ui.set({ title: label, artist: 'opening…', album: '' }); });
     if (faded) { idle(); await cleared; await cameraAtRest(); }
-    busy('Reading ' + label + '…');
+    busy(`${noticeMessages.reading} ${label}…`);
     try { song = xmlSet || jsonSet ? await openSet(list, jsonSet, busy) : await openLocal(file!, busy); }
-    catch (e) { if (!serverOn || xmlSet || jsonSet) throw e; console.warn('the server opens it:', e); }
+    catch (e) { 
+      if (xmlSet || jsonSet) 
+        throw e; 
+    }
     if (song) {
       await cleared;
       const old = LOCAL.cover;
@@ -221,15 +218,11 @@ export async function openDropped(input: DroppedFile | DroppedFile[], serverOn: 
       return;
     }
     LOCAL.payload = null; LOCAL.audio = null; LOCAL.stems = null; LOCAL.serverPack = false;
-    busy('Uploading ' + file!.name + '…');
-    await upload(file!, (f) => busy(`Uploading ${file!.name}… ${Math.round(f * 100)}%`));
-    const st = await waitForPack();
-    if (st.open_error) throw new Error(st.open_error);
     await cleared; await showSong();
   } catch (err) {
     let back = false;
     try { await cleared; await showSong(true); back = true; } catch { /* песни не было */ }
-    notice('Could not open that song: ' + (err as Error).message);
+    notice(`${noticeMessages.cantOpen} ${(err as Error).message}`);
     setTimeout(idle, 8000);
     if (!back) { ui.set({ title: 'Play Song', artist: 'no song open' }); showHint(true); }
   } finally { FLAGS.opening = false; lockInput(false); }

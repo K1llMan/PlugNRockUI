@@ -5,7 +5,6 @@ import { unlockAudio } from '../core/audio';
 import { savePrefs } from '../core/prefs';
 import { clamp } from '../core/util';
 import { openDropped, readTree } from '../core/files';
-import { SERVER } from '../core/session';
 import type { DroppedFile } from '../types';
 
 export function useGlobalInput() {
@@ -50,9 +49,10 @@ export function useGlobalInput() {
       e.preventDefault(); depth = 0; ui.set({ dropActive: false });
       if (inputLocked()) return;
       const ents = [...(e.dataTransfer!.items || [])].map((i) => (i.webkitGetAsEntry ? i.webkitGetAsEntry() : null)).filter(Boolean) as FileSystemEntry[];
-      if (ents.some((x) => x.isDirectory)) { readTree(ents).then((l) => { if (l.length) void openDropped(l, SERVER.on); }); return; }
+      if (ents.some((x) => x.isDirectory)) { readTree(ents).then((l) => { if (l.length) void openDropped(l); }); return; }
       const files = [...(e.dataTransfer!.files || [])] as DroppedFile[];
-      if (files.length) void openDropped(files, SERVER.on);
+      if (files.length) 
+        void openDropped(files);
     };
     window.addEventListener('dragenter', enter); window.addEventListener('dragover', over);
     window.addEventListener('dragleave', leave); window.addEventListener('drop', drop);

@@ -1,41 +1,25 @@
+import { getIntlayer } from 'intlayer';
+
 import type { Arrangement, SongPayload } from '../types';
 import { STATE } from './state';
 import { ui, busy, idle, notice, showHint, lockInput } from './store';
-import { AUDIO, loadAudio, pause, play, seek, setWaiting, slowForget } from './audio';
+import { AUDIO, loadAudio, pause, play, seek, setWaiting } from './audio';
 import { buildPhrases, loadSongData, resetLyricTold, selectArrangement, resetHud, applyOffset } from './chart';
 import { SEL } from './loop';
 import { REST_HEAD_START } from './const';
 import { resize } from '../render/surface';
 import { startFrames } from './frame';
 import { SYNTH } from './synth';
-import { loadPrefs, setServerFlag } from './prefs';
-import { openLocal, startWorker } from './files';
+import { loadPrefs } from './prefs';
+import { startWorker } from './files';
 import { loadStatics } from './files';
 
 export const LOCAL: { payload: SongPayload | null; cover: string; audio: Blob | null; stems: Map<string, Blob> | null; serverPack: boolean } =
   { payload: null, cover: '', audio: null, stems: null, serverPack: false };
-export const SERVER = { on: false };
-let firstSong = true, probe: Promise<boolean> | null = null;
+let firstSong = true;
 
-async function probeServer() {
-  // Никаких серверов!
-  return false;
+const noticeMessages = getIntlayer('notice');
 
-  try {
-    const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), 1500);
-    const r = await fetch('/api/status', { cache: 'no-store', signal: ctrl.signal });
-    clearTimeout(t);
-    if (!r.ok) return false;
-    JSON.parse(await r.text()); return true;
-  } catch { return false; }
-}
-export function serverAvailable() {
-  if (!probe) probe = (async () => {
-    const ok = (await probeServer()) || (await new Promise((r) => setTimeout(r, 250), 0), await probeServer());
-    SERVER.on = ok; setServerFlag(ok); ui.set({ server: ok }); return ok;
-  })();
-  return probe;
-}
 export function fadeTo(v: number) {
   STATE.visTo = v;
   return new Promise<void>((res) => {
@@ -56,24 +40,12 @@ export function restChart() {
   resetHud();
   ui.set({ loop: false, loopSel: false, arrs: [], arrIdx: 0, tuning: null, stems: [], stemId: '', sections: [], toneChanges: [], tone: null, secIdx: -1, secName: '', hasSong: false, hasArt: false, cover: '', tabRev: ui.get().tabRev + 1 });
 }
-interface Status { stage?: string; message?: string; error?: string; open_error?: string; source?: { name: string }; generation?: boolean }
-export async function waitForPack(): Promise<Status> {
-  for (;;) {
-    let st: Status;
-    try { st = await (await fetch('/api/status')).json(); }
-    catch { st = { stage: 'starting', message: 'Waiting for the Play Song server…' }; }
-    if (st.stage === 'ready' || st.stage === 'empty') return st;
-    if (st.stage === 'standby') fetch('/api/load', { method: 'POST' }).catch(() => { /* сервер сам откроет */ });
-    if (st.stage === 'error') throw new Error(st.error || 'the pack could not be opened');
-    busy(st.message || 'Processing…');
-    await new Promise((r) => setTimeout(r, 400));
-  }
-}
+
 export async function showSong(noPlay?: boolean) {
   showHint(false);
-  ui.set({ serverPack: SERVER.on && LOCAL.serverPack });
-  busy('Reading the chart…');
-  const d: SongPayload = LOCAL.payload || await (await fetch('/api/song')).json();
+  ui.set({ serverPack: false });
+  busy(noticeMessages.readingChart);
+  const d: SongPayload = LOCAL.payload!;
   if ((d as unknown as { error?: string }).error) throw new Error((d as unknown as { error: string }).error);
   if (AUDIO.playing) pause();
   AUDIO.buf = null; AUDIO.offset = 0; AUDIO.playing = false;
@@ -84,10 +56,7 @@ export async function showSong(noPlay?: boolean) {
   ui.set({ playing: false, loop: false, loopSel: false, offMs: 0, lyricError: '' });
   loadSongData(d);
   STATE.duration = +(d.meta && d.meta.duration) || 0;
-  if (SERVER.on) {
-    const m = d.meta || ({} as SongPayload['meta']);
-    fetch('/api/now', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: m.title || '', artist: m.artist || '', pack: m.pack || '' }) }).catch(() => { /* сервер не слушает */ });
-  }
+
   if (STATE.beats.length > 3) {
     const gaps: number[] = [];
     for (let i = 1; i < STATE.beats.length; i++) { const g = STATE.beats[i].time - STATE.beats[i - 1].time; if (g > 0.08 && g < 2) gaps.push(g); }
@@ -112,7 +81,7 @@ export async function showSong(noPlay?: boolean) {
   ui.set({ offMsg: cum ? `this pack has already been shifted ${cum > 0 ? '+' : ''}${cum} ms in total` : 'Positive offset = chart later than the audio.' });
   resize(); 
   startFrames();
-  busy('Decoding the audio…');
+  busy(noticeMessages.decodingAudio);
   try { 
     await loadAudio(''); 
     buildPhrases(); 
@@ -120,7 +89,7 @@ export async function showSong(noPlay?: boolean) {
   }
   catch (err) {
     console.warn('audio unavailable:', err);
-    notice('The audio could not be decoded - the highway still plays, silently.');
+    notice(noticeMessages.cantDecodeAudio);
     setTimeout(idle, 6000); return;
   }
   idle();
@@ -128,7 +97,7 @@ export async function showSong(noPlay?: boolean) {
   SYNTH.solo(null); 
 
   if (AUDIO.silent) { 
-    notice('No audio came with this chart - it plays silently. Drop the chart together with the song\'s audio to hear it.'); 
+    notice(noticeMessages.noAudio); 
     setTimeout(idle, 7000); 
   }
   if (noPlay || q.has('paused')) 
@@ -136,12 +105,13 @@ export async function showSong(noPlay?: boolean) {
   play();
   if (AUDIO.ctx && AUDIO.ctx.state === 'suspended') {
     setWaiting(true);
-    notice('Ready - click anywhere or press Space to start' + (AUDIO.silent ? ' (no audio came with this chart: it plays silently)' : ''));
+    notice(noticeMessages.ready);
   }
 }
 export async function changeStem(id: string) {
   const keep = STATE.time, was = STATE.playing;
-  pause(); busy('Decoding the audio…');
+  pause(); 
+  busy(noticeMessages.decodingAudio);
   try { await loadAudio(id); } finally { idle(); }
   seek(Math.min(keep, STATE.duration - 0.05));
   ui.set({ stemId: id });
@@ -151,73 +121,29 @@ export async function saveOffset() {
   const ms = STATE.offMs;
   if (!ms) { 
     ui.set({ offMsg: 'offset is 0 - nothing to save.' }); 
-    return; 
   }
-  ui.set({ offMsg: `saving ${ms > 0 ? '+' : ''}${ms} ms into the pack…` });
-  try {
-    const r = await fetch('/api/note-offset', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ms }) });
-    const d = await r.json();
-    if (!r.ok || d.error) { ui.set({ offMsg: 'save failed: ' + (d.error || r.status) }); return; }
-    const fresh: SongPayload = await (await fetch('/api/song')).json();
-    if (LOCAL.payload) LOCAL.payload = fresh;
-    loadSongData(fresh); STATE.offMs = 0; ui.set({ offMs: 0 });
-    selectArrangement(STATE.arrIdx); slowForget();
-    ui.set({ tabRev: ui.get().tabRev + 1, offMsg: `saved ${ms > 0 ? '+' : ''}${ms} ms (${d.moved} times moved${d.clamped ? ', ' + d.clamped + ' clamped at 0' : ''})` });
-  } catch (err) { ui.set({ offMsg: 'save failed: ' + (err as Error).message }); }
 }
 
 export async function boot() {
   lockInput(true);
   try {
-    busy('Starting…');
+    busy(noticeMessages.starting);
     await loadPrefs();
     restChart(); 
     resize(); 
     startFrames();
-    await serverAvailable();
 
-    if (!SERVER.on) {
-      startWorker().then((w) => { 
-        if (!w) return loadStatics(); 
-      }).catch(() => { /* откроем в странице */ });
-      idle(); 
-      ui.set({ title: 'Play Song', artist: 'no song open' }); 
-      showHint(true); 
-      return;
-    }
-
-    // Никаких серверов!
-    fetch('/api/limits').then((r) => r.json()).then((L) => ui.set({
-      hintNote: `The file is sent to this server to be converted (up to ${L.max_upload_mb} MB), and deleted after ${L.idle_minutes} minutes without use. Nothing is changed in your file.`,
-    })).catch(() => { /* лимиты не обязательны */ });
-    let st0: Status | null = null;
-    try { st0 = await (await fetch('/api/status', { cache: 'no-store' })).json(); } catch { /* нет статуса */ }
-    const src = st0?.source;
-    if (src && /\.(feedpak|sloppak)$/i.test(src.name)) {
-      try {
-        busy('Reading ' + src.name + '…'); ui.set({ title: src.name, artist: 'opening…' });
-        const res = await fetch('/api/source');
-        if (!res.ok) throw new Error('the server did not send the file (' + res.status + ')');
-        const song = await openLocal(new File([await res.blob()], src.name), busy);
-        LOCAL.payload = song.payload; LOCAL.cover = song.cover; LOCAL.audio = song.audio; LOCAL.stems = song.stems; LOCAL.serverPack = true;
-        await showSong(); return;
-      } catch (e) {
-        console.warn('the server opens it:', e);
-        LOCAL.payload = null; LOCAL.audio = null; LOCAL.stems = null; LOCAL.cover = '';
-        await fetch('/api/load', { method: 'POST' }).catch(() => { /* сервер сам */ });
-      }
-    }
-    LOCAL.serverPack = !!(st0 && !st0.generation);
-    const st = await waitForPack();
-    if (st.stage === 'empty') { 
-      idle(); 
-      ui.set({ title: 'Play Song', artist: 'no song open' }); 
-      showHint(true); 
-      return; 
-    }
-    await showSong();
+    startWorker().then((w) => { 
+      if (!w) return loadStatics(); 
+    }).catch(() => { /* откроем в странице */ });
+    idle(); 
+    ui.set({ title: 'Play Song', artist: 'no song open' }); 
+    showHint(true); 
   } catch (err) {
     ui.set({ msg: 'Could not start: ' + (err as Error).message, msgKind: 'plain' });
     console.error(err);
-  } finally { lockInput(false); }
+  } 
+  finally { 
+    lockInput(false); 
+  }
 }

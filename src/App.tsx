@@ -7,7 +7,7 @@ import Bar from './ui/Bar';
 import Options from './ui/Options';
 import { useUi } from './core/store';
 import { useGlobalInput } from './ui/hooks';
-import { boot, SERVER } from './core/session';
+import { boot } from './core/session';
 import { openDropped, registerFileInput } from './core/files';
 import { inputLocked } from './core/store';
 import type { DroppedFile } from './types';
@@ -45,7 +45,7 @@ export default function App() {
       onChange={(e) => { 
         const f = [...(e.currentTarget.files || [])] as DroppedFile[]; 
         if (f.length && !inputLocked()) 
-          void openDropped(f, SERVER.on); 
+          void openDropped(f); 
         }
       } />
   </>;

@@ -12,8 +12,7 @@ export const PREFS: Record<string, [number, number] | 0> = {
   showFingers: 0, invert: 0, lefty: 0, tabView: 0, showChord: 0, showDiagram: 0, showHit: 0, clickOn: 0, synthOn: 0, muted: 0, fx: 0,
 };
 export type PrefKey = keyof typeof PREFS;
-let SERVER_ON = false;
-export const setServerFlag = (v: boolean) => { SERVER_ON = v; };
+
 let timer = 0;
 export function savePrefs() {
   clearTimeout(timer);
@@ -21,22 +20,11 @@ export function savePrefs() {
     const o: Record<string, unknown> = {};
     for (const k in PREFS) o[k] = STATE[k];
     try { localStorage.setItem('playsong.prefs', JSON.stringify(o)); } catch { /* приватный режим */ }
-    if (SERVER_ON) 
-      fetch('/api/prefs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(o) }).catch(() => { /* нет сервера */ });
   }, 350);
 }
 export async function loadPrefs() {
   try {
     let p: Record<string, unknown> | null = null;
-    // Никаких серверов!
-    /*
-    try {
-      const ctrl = new AbortController(), tm = setTimeout(() => ctrl.abort(), 1200);
-      const r = await fetch('/api/prefs', { cache: 'no-store', signal: ctrl.signal });
-      clearTimeout(tm);
-      if (r.ok) { const j = JSON.parse(await r.text()); if (j && typeof j === 'object' && !Array.isArray(j) && !j.error) p = j; }
-    } catch {  }
-    */
 
     if (!p) 
       p = JSON.parse(localStorage.getItem('playsong.prefs') || '{}') || {};

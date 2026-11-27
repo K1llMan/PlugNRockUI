@@ -1,0 +1,15 @@
+{
+    "filesConstraints": "Only .feedpak, .sloppak, arrangement .xml or .json files can be played",
+    "cantOpen": "Could not open that song:",
+    "cantDecodeAudio": "The audio could not be decoded - the highway still plays, silently.",
+    "noAudio": "No audio came with this chart - it plays silently. Drop the chart together with the song\\'s audio to hear it.",
+    "ready": "Ready - click anywhere or press Play button to start.",
+
+    "mixingStems": "Mixing the stems…",
+    "preparingPlayback": "Preparing slowed playback…",
+    "reading": "Reading",
+    "readingChart": "Reading the chart…",
+    "decodingAudio": "Decoding the audio…",
+    "convertingAudio": "Converting the audio…",
+    "starting": "Starting…"    
+}

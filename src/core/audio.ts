@@ -1,9 +1,13 @@
+import { getIntlayer } from 'intlayer';
+
 import { STATE } from './state';
 import { ui, idle, busy } from './store';
 import { clamp } from './util';
 import { LOOP_LEAD } from './const';
 import { SYNTH  } from './synth';
 import { LOCAL } from './session';
+
+const noticeMessages = getIntlayer('notice');
 
 export const AUDIO = {
   ctx: null as AudioContext | null, buf: null as AudioBuffer | null, src: null as AudioBufferSourceNode | null,
@@ -42,7 +46,7 @@ async function mixStems(stem: string): Promise<AudioBuffer> {
   const blobs = [...(LOCAL.stems as Map<string, Blob>).values()];
   const SLICE = 1 << 20, POOL = Math.max(1, Math.min(2, blobs.length));
   let out: AudioBuffer | null = null, done = 0, next = 0, adding: Promise<void> = Promise.resolve();
-  busy(`Mixing the stems… 0/${blobs.length}`);
+  busy(`${noticeMessages.mixingStems} 0/${blobs.length}`);
   const add = async (buf: AudioBuffer) => {
     if (!out || buf.length > out.length) {
       const bigger = ctx.createBuffer(2, buf.length, buf.sampleRate);
@@ -57,7 +61,7 @@ async function mixStems(stem: string): Promise<AudioBuffer> {
       for (let k = k0; k < k1; k++) { L[k] += l[k]; R[k] += r[k]; }
       await breathe();
     }
-    busy(`Mixing the stems… ${++done}/${blobs.length}`);
+    busy(`${noticeMessages.mixingStems} ${++done}/${blobs.length}`);
   };
   const lane = async () => {
     while (next < blobs.length) {
@@ -80,13 +84,7 @@ export async function loadAudio(stem: string) {
     }));
     AUDIO.buf = AUDIO.ctx!.createBuffer(1, Math.ceil((Math.max(10, last) + 3) * 8000), 8000); AUDIO.silent = true;
   } else {
-    let raw: ArrayBuffer;
-    if (LOCAL.audio) raw = await LOCAL.audio.arrayBuffer();
-    else {
-      const res = await fetch('/audio' + (stem ? '?stem=' + encodeURIComponent(stem) : ''));
-      if (!res.ok) throw new Error('audio: ' + res.status);
-      raw = await res.arrayBuffer();
-    }
+    let raw: ArrayBuffer = await LOCAL.audio!.arrayBuffer();
     AUDIO.buf = await AUDIO.ctx!.decodeAudioData(raw);
   }
   slowForget();
@@ -113,7 +111,7 @@ export function slowForget() {
 }
 export async function slowReady() {
   if (AUDIO.elUrl || !AUDIO.buf) return;
-  busy('Preparing slowed playback…');
+  busy(noticeMessages.preparingPlayback);
   await new Promise((r) => setTimeout(r, 30));
   AUDIO.elUrl = URL.createObjectURL(wavBlob(AUDIO.buf));
   if (!AUDIO.el) {
