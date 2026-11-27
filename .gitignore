@@ -3,3 +3,4 @@
 node_modules
 .intlayer
 yarn.lock
+dist

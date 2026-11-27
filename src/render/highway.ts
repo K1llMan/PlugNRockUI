@@ -37,7 +37,7 @@ export const DEFAULT_HIGHWAY_CONFIG: HighwayConfig = {
   maxFret: 24, 
   lookAhead: LOOK, 
   lookBack: LOOK_BACK,
-  inlayImage: `/src/assets/inlays/numbers.svg`
+  inlayImage: new URL(`/src/assets/inlays/numbers.svg`, import.meta.url).href
 };
 
 /** Один элемент упорядоченного «слоя» нот/аккордов, летящих к камере. */

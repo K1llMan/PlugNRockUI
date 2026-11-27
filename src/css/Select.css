@@ -101,7 +101,6 @@
 }
 
 .Select .options.show {
-    //visibility: visible;
     flex-flow: column;       
 }
 

@@ -1,5 +1,7 @@
 import react from '@vitejs/plugin-react';
 import { intlayer } from "vite-intlayer";
+import { viteSingleFile } from 'vite-plugin-singlefile';
+import { viteStaticCopy } from 'vite-plugin-static-copy';
 import svgr from 'vite-plugin-svgr';
 
 import { defineConfig } from 'vite';
@@ -18,7 +20,19 @@ export default defineConfig({
   plugins: [
     intlayer(),
     react(),
-    svgr()
+    svgr(),
+    viteSingleFile(),
+    viteStaticCopy({
+      targets: [
+        {
+          // Берём всё содержимое папки web
+          src: 'web/**/*',
+          // Копируем в папку dist/web (укажите '.', если нужно в корень dist)
+          dest: '.'
+        },
+        { src: 'src/assets/inlays', dest: '.', rename: { stripBase: 1 } }
+      ]
+    })    
   ],
   base: './',
   server: { port: 5173, proxy: { '/api': { target, changeOrigin: true }, '/audio': { target, changeOrigin: true } } },
