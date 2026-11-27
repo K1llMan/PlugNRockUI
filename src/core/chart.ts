@@ -3,10 +3,9 @@ import { STATE, currentArr } from './state';
 import { ui } from './store';
 import { clamp, lowerBound, mkNote, chordLabel } from './util';
 import { FING_GAP, FING_IN, FING_MOVE, HOLD_GAP, LYR_GAP, LYR_LEAD, NAMED_TUNINGS, NOTE_NAMES, OPEN_BASS, OPEN_GTR, REPEAT_GAP } from './const';
-import { buildSynth } from './synth';
+import { SYNTH, SynthTrack } from './synth';
 import { clearLoopBars, SEL } from './loop';
 import { syncBeats } from './audio';
-import { synKill, synSync } from './synth';
 
 let lyricTold = false;
 export const resetLyricTold = () => { lyricTold = false; };
@@ -94,7 +93,23 @@ export function selectArrangement(i: number) {
     if (an.t - lastRow < 0.8) return;
     lastRow = an.t; an.row = true;
   });
-  buildHolds(tpl); buildSynth(a); clearLoopBars(); buildPhrases();
+  buildHolds(tpl); 
+
+  // Установка громкости треков синтезатора
+  SYNTH.list()
+    .forEach((t: SynthTrack) => {
+      let isCurArr = t.arrangement?.name == a.name;
+      let isBass = /bass/i.test(t.arrangement?.name || '');
+
+      if (isBass)
+        t.setLevel(isCurArr ? 0.8 : 0.6);
+      else
+        t.setLevel(isCurArr ? 1 : 0.8);
+    });
+
+  clearLoopBars(); 
+  buildPhrases();
+
   if (!STATE.keepCam) STATE.camC = null;
   STATE.tones = { base: a.tones?.base || '', changes: a.tones?.changes || [], names: a.tones?.names || {} };
   const T = tuningText(a); STATE.tuneNames = T.notes.split(' ');
@@ -218,8 +233,12 @@ export function loadSongData(d: SongPayload) {
 }
 export function applyOffset(ms: number) {
   STATE.offMs = Math.round(ms); ui.set({ offMs: STATE.offMs }); resetHud();
-  if (STATE.clickOn) syncBeats();
-  synKill(); synSync();
+  if (STATE.clickOn) 
+    syncBeats();
+
+  SYNTH.kill();
+  SYNTH.sync();
+
   if (STATE.loopSel && SEL.i0 >= 0 && STATE.phrases[SEL.i1]) {
     STATE.loopA = Math.max(0, STATE.phrases[SEL.i0].t0 + STATE.offMs / 1000);
     STATE.loopB = STATE.phrases[SEL.i1].t1 + STATE.offMs / 1000;

@@ -1,10 +1,8 @@
 import { useEffect } from 'react';
 import { STATE } from '../core/state';
 import { ui, inputLocked } from '../core/store';
-import { seek, togglePlay } from '../core/audio';
 import { unlockAudio } from '../core/audio';
-import { sectionAt, applyOffset, selectArrangement } from '../core/chart';
-import { setPref, savePrefs } from '../core/prefs';
+import { savePrefs } from '../core/prefs';
 import { clamp } from '../core/util';
 import { openDropped, readTree } from '../core/files';
 import { SERVER } from '../core/session';

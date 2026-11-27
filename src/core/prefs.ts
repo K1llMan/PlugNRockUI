@@ -2,7 +2,7 @@ import { STATE, updGeom } from './state';
 import { ui } from './store';
 import { clamp } from './util';
 import { AUDIO } from './audio';
-import { SY, synKill, synSync } from './synth';
+import { SYNTH } from './synth';
 import { syncBeats } from './audio';
 import { resize } from '../render/surface';
 
@@ -66,9 +66,9 @@ export function setPref(key: PrefKey, value: number | boolean) {
     case 'master': if (!STATE.muted && AUDIO.gain) AUDIO.gain.gain.value = STATE.master; break;
     case 'muted': if (AUDIO.gain) AUDIO.gain.gain.value = STATE.muted ? 0 : STATE.master; break;
     case 'clickLevel': if (AUDIO.gainClick) AUDIO.gainClick.gain.value = STATE.clickLevel; break;
-    case 'synthLevel': if (SY.out) SY.out.gain.value = STATE.synthLevel; break;
+    case 'synthLevel': if (SYNTH.out) SYNTH.out.gain.value = STATE.synthLevel; break;
     case 'clickOn': if (STATE.clickOn) syncBeats(); break;
-    case 'synthOn': STATE.synthOn ? synSync() : synKill(); break;
+    case 'synthOn': STATE.synthOn ? SYNTH.sync() : SYNTH.kill(); break;
     case 'rscale': resize(); break;
     case 'autoScale': STATE.dynScale = 1; resize(); break;
     case 'speed': updGeom(); break;

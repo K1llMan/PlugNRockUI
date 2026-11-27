@@ -2,7 +2,7 @@ import { STATE } from './state';
 import { ui, idle, busy } from './store';
 import { clamp } from './util';
 import { LOOP_LEAD } from './const';
-import { SY, synKill, synSync } from './synth';
+import { SYNTH  } from './synth';
 import { LOCAL } from './session';
 
 export const AUDIO = {
@@ -136,7 +136,9 @@ export async function setSongSpeed(r: number) {
 }
 export function songEnded() {
   if (STATE.loop) { startAt(Math.max(0, STATE.loopA - LOOP_LEAD)); return; }
-  AUDIO.playing = false; STATE.playing = false; stopSources(); synKill();
+  AUDIO.playing = false; 
+  STATE.playing = false; stopSources(); 
+  SYNTH.kill();
   const cam = STATE.camC; seek(0); STATE.camC = cam; ui.set({ playing: false });
 }
 export function startAt(t: number) {
@@ -153,7 +155,9 @@ export function startAt(t: number) {
     AUDIO.src.onended = () => { if (AUDIO.playing && AUDIO.mode === 'buf') songEnded(); };
   }
   AUDIO.playing = true; STATE.playing = true; ui.set({ playing: true });
-  syncBeats(); synKill(); synSync();
+  syncBeats(); 
+  SYNTH.kill(); 
+  SYNTH.sync();
 }
 export function play() {
   audioInit();
@@ -166,7 +170,9 @@ export function play() {
 export function pause() {
   if (!AUDIO.playing) return;
   AUDIO.offset = songTime(); AUDIO.playing = false; STATE.playing = false;
-  stopSources(); synKill(); ui.set({ playing: false });
+  stopSources(); 
+  SYNTH.kill();
+  ui.set({ playing: false });
 }
 export function seek(t: number) {
   const was = AUDIO.playing;
@@ -181,7 +187,7 @@ export function togglePlay() {
 export async function fadeOutPlaying() {
   if (!STATE.playing || !AUDIO.ctx) return false;
   const c = AUDIO.ctx, now = c.currentTime;
-  for (const g of [AUDIO.gain, AUDIO.gainClick, SY.out]) {
+  for (const g of [AUDIO.gain, AUDIO.gainClick, SYNTH.out]) {
     if (!g) continue;
     g.gain.cancelScheduledValues(now); g.gain.setValueAtTime(g.gain.value, now); g.gain.linearRampToValueAtTime(0, now + SWITCH_FADE_LOCAL);
   }
@@ -189,7 +195,7 @@ export async function fadeOutPlaying() {
   await new Promise((r) => setTimeout(r, SWITCH_FADE_LOCAL * 1000 + 30));
   pause();
   const t = c.currentTime;
-  for (const [g, v] of [[AUDIO.gain, STATE.muted ? 0 : STATE.master], [AUDIO.gainClick, STATE.clickLevel], [SY.out, STATE.synthLevel]] as [GainNode | null, number][]) {
+  for (const [g, v] of [[AUDIO.gain, STATE.muted ? 0 : STATE.master], [AUDIO.gainClick, STATE.clickLevel], [SYNTH.out, STATE.synthLevel]] as [GainNode | null, number][]) {
     if (!g) continue; g.gain.cancelScheduledValues(t); g.gain.setValueAtTime(v, t);
   }
   STATE.vis = 0; STATE.visDur = 0;

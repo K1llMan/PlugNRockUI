@@ -185,7 +185,9 @@ function upload(file: File, onProgress: (f: number) => void) {
   });
 }
 export async function openDropped(input: DroppedFile | DroppedFile[], serverOn: boolean) {
-  if (FLAGS.opening) return;
+  if (FLAGS.opening) 
+    return;
+
   const list = Array.isArray(input) ? input : [input];
   const xmlSet = list.some((f) => /\.xml$/i.test(f.name));
   const jsonSet = !xmlSet && (list.some((f) => /(^|\/)manifest\.ya?ml$/i.test(f.relPath || f.name)) || list.some((f) => /\.json$/i.test(f.name) && !/lyrics/i.test(f.name)))
@@ -193,7 +195,8 @@ export async function openDropped(input: DroppedFile | DroppedFile[], serverOn: 
   const file = xmlSet || jsonSet ? null : list.find((f) => /\.(feedpak|sloppak)$/i.test(f.name)) || null;
   if (!xmlSet && !jsonSet && !file) {
     notice('Only .feedpak, .sloppak, arrangement .xml or .json files can be played - not ' + (list[0]?.name || 'that'));
-    setTimeout(idle, 5000); return;
+    setTimeout(idle, 5000); 
+    return;
   }
   const label = xmlSet || jsonSet ? setName(list) : file!.name;
   FLAGS.opening = true; lockInput(true);
@@ -214,7 +217,8 @@ export async function openDropped(input: DroppedFile | DroppedFile[], serverOn: 
       const old = LOCAL.cover;
       LOCAL.payload = song.payload; LOCAL.cover = song.cover; LOCAL.audio = song.audio; LOCAL.stems = song.stems; LOCAL.serverPack = false;
       if (old.startsWith('blob:') && old !== LOCAL.cover) setTimeout(() => URL.revokeObjectURL(old), 2000);
-      await showSong(); return;
+      await showSong(); 
+      return;
     }
     LOCAL.payload = null; LOCAL.audio = null; LOCAL.stems = null; LOCAL.serverPack = false;
     busy('Uploading ' + file!.name + '…');

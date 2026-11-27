@@ -1,7 +1,7 @@
 import { STATE, FLAGS, chartTime } from './state';
 import { emitFrame, ui } from './store';
 import { songTime, seek, pump } from './audio';
-import { synPump } from './synth';
+import { SYNTH } from './synth';
 import { sectionAt, updateHud } from './chart';
 import { LOOP_LEAD } from './const';
 import { draw } from '../render/highway';
@@ -73,7 +73,7 @@ function frame(now: number) {
   emitFrame(STATE.time);
   updateHud(STATE.time, chartTime());
   pump(); 
-  synPump();
+  SYNTH.pump();
 
   acc += dt; 
   n++;

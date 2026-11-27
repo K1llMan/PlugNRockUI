@@ -127,7 +127,7 @@ function StemSelect({ stems, selected }: { stems: { id: string }[], selected: st
 
   if (stems.length)
     opt.push(...stems
-      .map((s: { id: string }, i: number) => {
+      .map((s: { id: string }) => {
         return {
           value: s.id,
           name: s.id.charAt(0).toUpperCase() + s.id.slice(1)

@@ -1,13 +1,13 @@
-import type { SongPayload } from '../types';
+import type { Arrangement, SongPayload } from '../types';
 import { STATE } from './state';
 import { ui, busy, idle, notice, showHint, lockInput } from './store';
-import { AUDIO, audioInit, loadAudio, pause, play, seek, setWaiting, slowForget } from './audio';
+import { AUDIO, loadAudio, pause, play, seek, setWaiting, slowForget } from './audio';
 import { buildPhrases, loadSongData, resetLyricTold, selectArrangement, resetHud, applyOffset } from './chart';
 import { SEL } from './loop';
 import { REST_HEAD_START } from './const';
 import { resize } from '../render/surface';
 import { startFrames } from './frame';
-import { synKill } from './synth';
+import { SYNTH } from './synth';
 import { loadPrefs, setServerFlag } from './prefs';
 import { openLocal, startWorker } from './files';
 import { loadStatics } from './files';
@@ -78,7 +78,9 @@ export async function showSong(noPlay?: boolean) {
   if (AUDIO.playing) pause();
   AUDIO.buf = null; AUDIO.offset = 0; AUDIO.playing = false;
   STATE.time = 0; STATE.playing = false; STATE.offMs = 0; STATE.bpm = 0; STATE.loopB = 0; STATE.loop = false; STATE.loopSel = false;
-  synKill(); resetLyricTold(); resetHud();
+  SYNTH.kill();
+  resetLyricTold(); 
+  resetHud();
   ui.set({ playing: false, loop: false, loopSel: false, offMs: 0, lyricError: '' });
   loadSongData(d);
   STATE.duration = +(d.meta && d.meta.duration) || 0;
@@ -108,17 +110,29 @@ export async function showSong(noPlay?: boolean) {
   if (q.has('off')) applyOffset(Math.max(-60000, Math.min(60000, Math.round(parseFloat(q.get('off')!) || 0))));
   const cum = +(STATE.meta.note_offset_ms || 0);
   ui.set({ offMsg: cum ? `this pack has already been shifted ${cum > 0 ? '+' : ''}${cum} ms in total` : 'Positive offset = chart later than the audio.' });
-  resize(); startFrames();
+  resize(); 
+  startFrames();
   busy('Decoding the audio…');
-  try { await loadAudio(''); buildPhrases(); ui.set({ duration: STATE.duration, tabRev: ui.get().tabRev + 1 }); }
+  try { 
+    await loadAudio(''); 
+    buildPhrases(); 
+    ui.set({ duration: STATE.duration, tabRev: ui.get().tabRev + 1 }); 
+  }
   catch (err) {
     console.warn('audio unavailable:', err);
     notice('The audio could not be decoded - the highway still plays, silently.');
     setTimeout(idle, 6000); return;
   }
   idle();
-  if (AUDIO.silent) { notice('No audio came with this chart - it plays silently. Drop the chart together with the song\'s audio to hear it.'); setTimeout(idle, 7000); }
-  if (noPlay || q.has('paused')) return;
+  SYNTH.setAll(d.arrangements.map((v: Arrangement) => ({ a: v })));
+  SYNTH.solo(null); 
+
+  if (AUDIO.silent) { 
+    notice('No audio came with this chart - it plays silently. Drop the chart together with the song\'s audio to hear it.'); 
+    setTimeout(idle, 7000); 
+  }
+  if (noPlay || q.has('paused')) 
+    return;
   play();
   if (AUDIO.ctx && AUDIO.ctx.state === 'suspended') {
     setWaiting(true);
