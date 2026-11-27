@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://w3.org" viewBox="0 0 2400 200" width="2400" height="200">
+  <defs>
+    <!-- Градиент перламутра для тестовой инкрустации -->
+    <linearGradient id="pearl-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="45%" stop-color="#a8e6cf" />
+      <stop offset="75%" stop-color="#dcedc1" />
+      <stop offset="100%" stop-color="#ffd3b6" />
+    </linearGradient>
+
+    <!-- Базовый тестовый рисунок (вписан в квадрат 100x100) -->
+    <g id="test-inlay">
+      <polygon points="50,14 86,50 50,86 14,50" fill="#1a1a1a" opacity="0.35" transform="translate(2, 3)" />
+      <polygon points="50,12 88,50 50,88 12,50" fill="url(#pearl-grad)" stroke="#d4af37" stroke-width="4" stroke-linejoin="round" />
+      <polygon points="50,25 75,50 50,75 25,50" fill="none" stroke="#ffffff" stroke-width="1.5" opacity="0.8" />
+    </g>
+  </defs>
+
+  <!-- ===================================================================== -->
+  <!-- 1. ОБЛАСТИ ПРОСМОТРА (VIEWS) — 1..24 лад, шаг строго 100              -->
+  <!-- ===================================================================== -->
+  <view id="fret-1"  viewBox="0 50 100 100" />
+  <view id="fret-2"  viewBox="100 50 100 100" />
+  <view id="fret-3"  viewBox="200 50 100 100" />
+  <view id="fret-4"  viewBox="300 50 100 100" />
+  <view id="fret-5"  viewBox="400 50 100 100" />
+  <view id="fret-6"  viewBox="500 50 100 100" />
+  <view id="fret-7"  viewBox="600 50 100 100" />
+  <view id="fret-8"  viewBox="700 50 100 100" />
+  <view id="fret-9"  viewBox="800 50 100 100" />
+  <view id="fret-10" viewBox="900 50 100 100" />
+  <view id="fret-11" viewBox="1000 50 100 100" />
+  <view id="fret-12" viewBox="1100 0 100 200" /> <!-- Вертикальный 100x200 -->
+  <view id="fret-13" viewBox="1200 50 100 100" />
+  <view id="fret-14" viewBox="1300 50 100 100" />
+  <view id="fret-15" viewBox="1400 50 100 100" />
+  <view id="fret-16" viewBox="1500 50 100 100" />
+  <view id="fret-17" viewBox="1600 50 100 100" />
+  <view id="fret-18" viewBox="1700 50 100 100" />
+  <view id="fret-19" viewBox="1800 50 100 100" />
+  <view id="fret-20" viewBox="1900 50 100 100" />
+  <view id="fret-21" viewBox="2000 50 100 100" />
+  <view id="fret-22" viewBox="2100 50 100 100" />
+  <view id="fret-23" viewBox="2200 50 100 100" />
+  <view id="fret-24" viewBox="2300 0 100 200" /> <!-- Вертикальный 100x200 -->
+
+  <!-- ===================================================================== -->
+  <!-- 2. ГРАФИКА ДЛЯ КАЖДОГО ЛАДА (1..24)                                    -->
+  <!-- ===================================================================== -->
+  <g id="art-fret-1"  transform="translate(0, 50)"></g>
+  <g id="art-fret-2"  transform="translate(100, 50)"></g>
+  <g id="art-fret-3"  transform="translate(200, 50)"><use href="#test-inlay" /></g>
+  <g id="art-fret-4"  transform="translate(300, 50)"></g>
+  <g id="art-fret-5"  transform="translate(400, 50)"><use href="#test-inlay" /></g>
+  <g id="art-fret-6"  transform="translate(500, 50)"></g>
+  <g id="art-fret-7"  transform="translate(600, 50)"><use href="#test-inlay" /></g>
+  <g id="art-fret-8"  transform="translate(700, 50)"></g>
+  <g id="art-fret-9"  transform="translate(800, 50)"><use href="#test-inlay" /></g>
+  <g id="art-fret-10" transform="translate(900, 50)"></g>
+  <g id="art-fret-11" transform="translate(1000, 50)"></g>
+  
+  <!-- 12-й лад (вертикальный слот 100x200) -->
+  <g id="art-fret-12" transform="translate(1100, 0)">
+    <use href="#test-inlay" x="0" y="0" />
+    <use href="#test-inlay" x="0" y="100" />
+  </g>
+
+  <g id="art-fret-13" transform="translate(1200, 50)"></g>
+  <g id="art-fret-14" transform="translate(1300, 50)"></g>
+  <g id="art-fret-15" transform="translate(1400, 50)"><use href="#test-inlay" /></g>
+  <g id="art-fret-16" transform="translate(1500, 50)"></g>
+  <g id="art-fret-17" transform="translate(1600, 50)"><use href="#test-inlay" /></g>
+  <g id="art-fret-18" transform="translate(1700, 50)"></g>
+  <g id="art-fret-19" transform="translate(1800, 50)"><use href="#test-inlay" /></g>
+  <g id="art-fret-20" transform="translate(1900, 50)"></g>
+  <g id="art-fret-21" transform="translate(2000, 50)"><use href="#test-inlay" /></g>
+  <g id="art-fret-22" transform="translate(2100, 50)"></g>
+  <g id="art-fret-23" transform="translate(2200, 50)"></g>
+
+  <!-- 24-й лад (вертикальный слот 100x200) -->
+  <g id="art-fret-24" transform="translate(2300, 0)">
+    <use href="#test-inlay" x="0" y="0" />
+    <use href="#test-inlay" x="0" y="100" />
+  </g>
+</svg>

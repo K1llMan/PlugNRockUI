@@ -20,6 +20,8 @@ export interface HighwayConfig {
   greyColor: string;
   /** Лады с декоративными инлеями. */
   inlays: Set<number>;
+  /** Путь к изображениям с ладами. */
+  inlayImage?: string,
   /** Номер последнего лада (длина грифа). */
   maxFret: number;
   /** Окно захвата камеры по времени, сек. */
@@ -28,8 +30,14 @@ export interface HighwayConfig {
 }
 
 export const DEFAULT_HIGHWAY_CONFIG: HighwayConfig = {
-  laneColors: LANE, fallbackLane: '#9aa7b2', greyColor: GREY_NOTE,
-  inlays: INLAY, maxFret: 24, lookAhead: LOOK, lookBack: LOOK_BACK,
+  laneColors: LANE, 
+  fallbackLane: '#9aa7b2', 
+  greyColor: GREY_NOTE,
+  inlays: INLAY, 
+  maxFret: 24, 
+  lookAhead: LOOK, 
+  lookBack: LOOK_BACK,
+  inlayImage: `/src/assets/inlays/numbers.svg`
 };
 
 /** Один элемент упорядоченного «слоя» нот/аккордов, летящих к камере. */
@@ -73,12 +81,18 @@ export class Highway {
   readonly state: EngineState;
 
   private W = 1; private H = 1; private cw = -1;
+  private inlayImage: HTMLImageElement;
 
   constructor(canvas: HTMLCanvasElement, cfg: HighwayConfig, state: EngineState) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d', { alpha: false }) as CanvasRenderingContext2D;
     this.cfg = cfg;
     this.state = state;
+
+    // Загрузка всех ладов из одного файла
+    this.inlayImage = new Image();
+    if (this.cfg.inlayImage)
+      this.inlayImage.src = this.cfg.inlayImage;
   }
 
   /** Кадр целиком: подготовить состояние кадра, затем проходы слева направо по глубине. */
@@ -327,20 +341,97 @@ export class Highway {
   }
 
   private drawInlays(v: View) {
-    const c = this.ctx, inlay = this.cfg.inlays;
+    const c = this.ctx;
+    const inlay = this.cfg.inlays;
+    const img = this.inlayImage;
+    const isSvgReady = Boolean(img && img.complete && img.naturalWidth > 0);
+
+    // Базовый размер инкрустации в мировых координатах грифа
+    const baseSize = FW * 0.8;
+
     for (let f = 1; f <= this.cfg.maxFret; f++) {
-      if (!inlay.has(f)) continue;
+      // Если используется SVG-атлас — проходим по всем ладам до 24 (пустые слоты в SVG прозрачны),
+      // иначе проверяем стандартный набор this.cfg.inlays для фоллбэка
+      if (!isSvgReady && !inlay.has(f)) continue;
+      if (isSvgReady && f > 24) continue;
+
       const inZone = f > v.zf0 && f <= v.zf1;
-      const ys = f % 12 === 0 ? [lerp(v.yBot, v.yTop, 0.25), lerp(v.yBot, v.yTop, 0.75)] : [(v.yBot + v.yTop) / 2];
-      for (const yy of ys) {
-        const p = v.P(fretMid(f), yy, 0);
-        if (!p || p.x < -40 || p.x > v.W + 40) continue;
-        const r = p.s * FW * 0.105;
-        c.globalAlpha = inZone ? 0.95 : 0.8; c.fillStyle = inZone ? '#b08a22' : '#0c5f58';
-        c.beginPath(); c.ellipse(p.x, p.y, r, r * 0.92, 0, 0, Math.PI * 2); c.fill();
-        c.lineWidth = Math.max(1, r * 0.16); c.strokeStyle = inZone ? '#e2bd4a' : '#17877c'; c.stroke();
+      const fx = fretMid(f);
+
+      if (isSvgReady && img) {
+        // Центр грифа по вертикали (12 и 24 лады уже вертикально сдвоены внутри самого SVG)
+        const yy = (v.yBot + v.yTop) / 2;
+        const pCenter = v.P(fx, yy, 0);
+        if (!pCenter || pCenter.x < -60 || pCenter.x > v.W + 60) continue;
+
+        // Вычисляем локальные векторы перспективы в плоскости грифа
+        const delta = 1.0;
+        const pRight = v.P(fx + delta, yy, 0);
+        const pDown = v.P(fx, yy + delta, 0);
+        if (!pRight || !pDown) continue;
+
+        const ux = (pRight.x - pCenter.x) / delta;
+        const uy = (pRight.y - pCenter.y) / delta;
+        const vx = (pDown.x - pCenter.x) / delta;
+        const vy = (pDown.y - pCenter.y) / delta;
+
+        // Координаты вырезки в .svg (шаг 100px на каждый лад)
+        const sx = (f - 1) * 100;
+        const sy = 0;
+        const sw = 100;
+        const sh = 200;
+
+        // Размеры на грифе
+        const w = baseSize;
+        const h = baseSize * 2;
+
+        c.save();
+        c.transform(ux, uy, vx, vy, pCenter.x, pCenter.y);
+
+        c.globalAlpha = inZone ? 1.0 : 0.78;
+        if (inZone) {
+          c.filter = 'brightness(1.2) drop-shadow(0 0 6px rgba(226, 189, 74, 0.65))';
+        }
+
+        // Правильное положение инкрустации
+        if (this.state.invert) {
+          if (this.state.lefty)
+            c.scale(1, 1);
+          else
+            c.scale(-1, 1);
+        }
+        else {
+          if (this.state.lefty)
+            c.scale(-1, -1);
+          else          
+            c.scale(1, -1);
+        }
+        c.drawImage(img, sx, sy, sw, sh, -w / 2, -h / 2, w, h);
+        c.restore();
+      } else {
+        // Фоллбэк: ваша исходная отрисовка эллипсов, пока SVG-файл еще не загрузился
+        const ys = f % 12 === 0
+          ? [lerp(v.yBot, v.yTop, 0.25), lerp(v.yBot, v.yTop, 0.75)]
+          : [(v.yBot + v.yTop) / 2];
+
+        for (const yy of ys) {
+          const p = v.P(fx, yy, 0);
+          if (!p || p.x < -40 || p.x > v.W + 40) continue;
+
+          const r = p.s * FW * 0.105;
+          c.globalAlpha = inZone ? 0.95 : 0.8;
+          c.fillStyle = inZone ? '#b08a22' : '#0c5f58';
+          c.beginPath();
+          c.ellipse(p.x, p.y, r, r * 0.92, 0, 0, Math.PI * 2);
+          c.fill();
+
+          c.lineWidth = Math.max(1, r * 0.16);
+          c.strokeStyle = inZone ? '#e2bd4a' : '#17877c';
+          c.stroke();
+        }
       }
     }
+
     c.globalAlpha = 1;
   }
 

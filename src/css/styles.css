@@ -892,11 +892,6 @@ body.locked {
     border-radius: 5px
 }
 
-.stack .ib svg {
-    width: 24px;
-    height: 24px
-}
-
 .stack .val {
     min-width: 36px
 }
@@ -945,8 +940,8 @@ body.locked {
 }
 
 .ib svg {
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 24px;
     display: block
 }
 
