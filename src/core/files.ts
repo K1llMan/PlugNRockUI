@@ -1,3 +1,4 @@
+import { convertWwiseRiffToOgg, getPackedCodebooks, type CodebooksVariant } from "ww2ogg-ts";
 import { getIntlayer } from 'intlayer';
 
 import type { DroppedFile, LoadedSong, SongPayload } from '../types';
@@ -15,7 +16,6 @@ const asset = (p: string) => import.meta.env.BASE_URL + p;
 
 declare global {
   interface Window {
-    WW2OGG?: { convertWwiseRiffToOgg: (b: Uint8Array, o: Record<string, unknown>) => { ogg: Uint8Array }; getPackedCodebooks: (v: string) => Uint8Array };
     CDLC_WORKER_SOURCE?: string;
     CDLC?: Record<string, (...a: never[]) => Promise<unknown>>;
   }
@@ -29,14 +29,20 @@ function loadScript(src: string) {
 }
 let statics: Promise<void> | null = null;
 export function loadStatics() {
-  if (!statics) 
-    statics = (async () => { await loadScript(asset('web/ww2ogg.bundle.js')); await loadScript(asset('web/converter.js')); })();
+  if (!statics)
+    statics = (async () => {
+      await loadScript(asset('web/converter.js'));
+    })();
   return statics;
 }
 export function convertWem(bytes: Uint8Array) {
-  const W = window.WW2OGG; if (!W) throw new Error('the audio decoder is not loaded');
   for (const v of ['aoTuV_603', 'standard']) {
-    try { return W.convertWwiseRiffToOgg(bytes, { codebooks: W.getPackedCodebooks(v), sourceName: 'audio.wem' }).ogg; }
+    try {
+      return convertWwiseRiffToOgg(bytes, {
+        codebooks: getPackedCodebooks(v as CodebooksVariant),
+        sourceName: 'audio.wem'
+      }).ogg;
+    }
     catch (e) { if (v === 'standard') throw e; }
   }
   throw new Error('the audio could not be converted');
@@ -51,36 +57,48 @@ let workerReady: Promise<Worker | null> | null = null, seq = 0;
 const pending = new Map<number, { resolve: (v: Result) => void; reject: (e: Error) => void; onStage: (s: string) => void }>();
 
 export function startWorker(): Promise<Worker | null> {
-  if (!workerReady) workerReady = (async () => {
-    if (typeof Worker === 'undefined') return null;
-    await loadScript(asset('web/converter.worker.js'));
-    const src = window.CDLC_WORKER_SOURCE; delete window.CDLC_WORKER_SOURCE;
-    if (!src) return null;
-    const url = URL.createObjectURL(new Blob([src], { type: 'text/javascript' }));
-    let w: Worker;
-    try { w = new Worker(url); } catch { URL.revokeObjectURL(url); return null; }
-    const up = await new Promise<boolean>((res) => {
-      const t = setTimeout(() => res(false), 4000);
-      w.onmessage = (ev) => { if (ev.data?.pong) { clearTimeout(t); res(true); } };
-      w.onerror = (ev) => { ev.preventDefault?.(); clearTimeout(t); res(false); };
-      w.postMessage({ ping: true });
-    });
-    URL.revokeObjectURL(url);
-    if (!up) { w.terminate(); return null; }
-    w.onmessage = (ev: MessageEvent) => {
-      const m = ev.data || {}, job = pending.get(m.id); if (!job) return;
-      if (m.stage !== undefined) { job.onStage(m.stage); return; }
-      pending.delete(m.id);
-      m.ok ? job.resolve(m.result) : job.reject(new Error(m.error));
-    };
-    w.onerror = (ev) => {
-      ev.preventDefault?.();
-      const err = new Error(ev.message || 'the converter stopped');
-      for (const j of pending.values()) j.reject(err);
-      pending.clear(); workerReady = null; try { w.terminate(); } catch { /* уже мёртв */ }
-    };
-    return w;
-  })().catch(() => null);
+  if (!workerReady)
+    workerReady = (async () => {
+      if (typeof Worker === 'undefined')
+        return null;
+      await loadScript(asset('web/converter.worker.js'));
+      const src = window.CDLC_WORKER_SOURCE;
+      delete window.CDLC_WORKER_SOURCE;
+      
+      if (!src)
+        return null;
+      
+      const url = URL.createObjectURL(new Blob([src], { type: 'text/javascript' }));
+      let w: Worker;
+      try { 
+        w = new Worker(url); 
+      } catch { 
+        URL.revokeObjectURL(url); 
+        return null; 
+      }
+      const up = await new Promise<boolean>((res) => {
+        const t = setTimeout(() => res(false), 4000);
+        w.onmessage = (ev) => { if (ev.data?.pong) { clearTimeout(t); res(true); } };
+        w.onerror = (ev) => { ev.preventDefault?.(); clearTimeout(t); res(false); };
+        w.postMessage({ ping: true });
+      });
+      URL.revokeObjectURL(url);
+      if (!up) { w.terminate(); return null; }
+      w.onmessage = (ev: MessageEvent) => {
+        const m = ev.data || {}, job = pending.get(m.id); if (!job) return;
+        if (m.stage !== undefined) { job.onStage(m.stage); return; }
+        pending.delete(m.id);
+        m.ok ? job.resolve(m.result) : job.reject(new Error(m.error));
+      };
+      w.onerror = (ev) => {
+        ev.preventDefault?.();
+        const err = new Error(ev.message || 'the converter stopped');
+        for (const j of pending.values()) j.reject(err);
+        pending.clear(); workerReady = null; try { w.terminate(); } catch { /* уже мёртв */ }
+      };
+      return w;
+    })()
+      .catch(() => null);
   return workerReady;
 }
 function ask(w: Worker, msg: Record<string, unknown>, onStage: (s: string) => void, transfer: Transferable[] = []) {
@@ -168,9 +186,9 @@ export async function openSet(list: DroppedFile[], json: boolean, onStage: (s: s
     const dec = (window.CDLC as unknown as { decodeDds?: (b: Uint8Array) => { width: number; height: number; rgba: Uint8Array } }).decodeDds;
     if (dds && dec) { try { const d = dec(new Uint8Array(dds.bytes)); cover = coverFromRgba(d.width, d.height, d.rgba); } catch { /* не DDS */ } }
     if (!cover && imageF && !/\.dds$/i.test(imageF.name)) cover = URL.createObjectURL(imageF);
-    if (wem) { 
-      onStage(noticeMessages.convertingAudio); 
-      await new Promise((res) => setTimeout(res, 20)); audio = new Blob([convertWem(new Uint8Array(wem.bytes))], { type: 'audio/ogg' }); 
+    if (wem) {
+      onStage(noticeMessages.convertingAudio);
+      await new Promise((res) => setTimeout(res, 20)); audio = new Blob([convertWem(new Uint8Array(wem.bytes))], { type: 'audio/ogg' });
     }
     else if (audioF && !/\.wem$/i.test(audioF.name)) audio = audioF;
   }
@@ -179,7 +197,7 @@ export async function openSet(list: DroppedFile[], json: boolean, onStage: (s: s
 }
 
 export async function openDropped(input: DroppedFile | DroppedFile[]) {
-  if (FLAGS.opening) 
+  if (FLAGS.opening)
     return;
 
   const list = Array.isArray(input) ? input : [input];
@@ -189,7 +207,7 @@ export async function openDropped(input: DroppedFile | DroppedFile[]) {
   const file = xmlSet || jsonSet ? null : list.find((f) => /\.(feedpak|sloppak)$/i.test(f.name)) || null;
   if (!xmlSet && !jsonSet && !file) {
     notice(noticeMessages.filesConstraints);
-    setTimeout(idle, 5000); 
+    setTimeout(idle, 5000);
     return;
   }
   const label = xmlSet || jsonSet ? setName(list) : file!.name;
@@ -205,16 +223,16 @@ export async function openDropped(input: DroppedFile | DroppedFile[]) {
     if (faded) { idle(); await cleared; await cameraAtRest(); }
     busy(`${noticeMessages.reading} ${label}…`);
     try { song = xmlSet || jsonSet ? await openSet(list, jsonSet, busy) : await openLocal(file!, busy); }
-    catch (e) { 
-      if (xmlSet || jsonSet) 
-        throw e; 
+    catch (e) {
+      if (xmlSet || jsonSet)
+        throw e;
     }
     if (song) {
       await cleared;
       const old = LOCAL.cover;
       LOCAL.payload = song.payload; LOCAL.cover = song.cover; LOCAL.audio = song.audio; LOCAL.stems = song.stems; LOCAL.serverPack = false;
       if (old.startsWith('blob:') && old !== LOCAL.cover) setTimeout(() => URL.revokeObjectURL(old), 2000);
-      await showSong(); 
+      await showSong();
       return;
     }
     LOCAL.payload = null; LOCAL.audio = null; LOCAL.stems = null; LOCAL.serverPack = false;
@@ -237,7 +255,7 @@ export async function readTree(entries: FileSystemEntry[]) {
       if (f) { const d = f as DroppedFile; d.relPath = en.fullPath.replace(/^\//, ''); out.push(d); }
     } else if (en.isDirectory && depth < 4) {
       const rd = (en as FileSystemDirectoryEntry).createReader();
-      for (;;) {
+      for (; ;) {
         const batch = await new Promise<FileSystemEntry[]>((res) => rd.readEntries((v) => res(v), () => res([])));
         if (!batch.length) break;
         for (const c of batch) await walk(c, depth + 1);
